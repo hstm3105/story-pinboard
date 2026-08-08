@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-barlow: 'Barlow Condensed', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+  --font-space-mono: 'Space Mono', monospace;
+}
+
+body {
+  background-color: #121417;
+  color: #EDEDED;
+  font-family: var(--font-inter);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbars for Horizontal Rows */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121417;
+}
+::-webkit-scrollbar-thumb {
+  background: #2E333C;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C4302B;
+}
+
+/* High Visibility Keyboard Focus States */
+:focus-visible {
+  outline: 2px solid #C4302B !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 15px rgba(196, 48, 43, 0.6) !important;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

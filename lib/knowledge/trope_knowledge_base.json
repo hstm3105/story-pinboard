@@ -1,0 +1,114 @@
+{
+  "Romance": {
+    "genre": "Romance",
+    "commonTropes": [
+      {
+        "name": "Contract Marriage Codicil",
+        "description": "A fake marriage required to secure a corporate inheritance.",
+        "subversionAngle": "The fake bride holds the core patent needed to save the groom's company.",
+        "emotionalPayoff": "Romantic power balance shift and satisfying revenge."
+      },
+      {
+        "name": "Forbidden Identity",
+        "description": "Falling in love with a rival dynasty's hidden heir.",
+        "subversionAngle": "Both lovers know each other's secrets from day one.",
+        "emotionalPayoff": "High-tension intimacy and tactical alliance."
+      }
+    ]
+  },
+  "Psychological Thriller": {
+    "genre": "Psychological Thriller",
+    "commonTropes": [
+      {
+        "name": "The Unreliable Confession",
+        "description": "A caller claiming to be a killer from a cold case.",
+        "subversionAngle": "The caller is not the killer, but the victim's forgotten twin exposing police corruption.",
+        "emotionalPayoff": "Chilling revelation and moral suspense."
+      },
+      {
+        "name": "Paranoid Mirror",
+        "description": "A therapist discovering their patient is detailing the therapist's own forgotten past.",
+        "subversionAngle": "The patient is actually a simulation created by the therapist to recover lost memories.",
+        "emotionalPayoff": "Mind-bending psychological thrill."
+      }
+    ]
+  },
+  "Sci-Fi": {
+    "genre": "Sci-Fi",
+    "commonTropes": [
+      {
+        "name": "Forbidden Neural Chip",
+        "description": "An illegal memory drive containing corporate/sovereign secrets.",
+        "subversionAngle": "The memory drive belongs to the city's ruler, revealing he was once a human resident of the slums.",
+        "emotionalPayoff": "Awe, existential intrigue, and underdog empowerment."
+      },
+      {
+        "name": "High-Tech Low-Life",
+        "description": "Advanced cybernetics amidst crumbling neon slums.",
+        "subversionAngle": "The slum technicians possess better raw ingenuity than corporate engineers.",
+        "emotionalPayoff": "Street-smart vindication and anti-establishment satisfaction."
+      }
+    ]
+  },
+  "Fantasy": {
+    "genre": "Fantasy",
+    "commonTropes": [
+      {
+        "name": "The Rejected Lineage",
+        "description": "An outcast cast aside by a ruthless lord.",
+        "subversionAngle": "Her dormant lineage connects directly to the ancient High Sovereign.",
+        "emotionalPayoff": "Ultimate emotional vindication and royal ascendance."
+      },
+      {
+        "name": "Forbidden Elemental Rune",
+        "description": "Unlocking forbidden magic sealed for centuries.",
+        "subversionAngle": "The rune requires harmony between light and void rather than pure light.",
+        "emotionalPayoff": "Epic magical mastery and balance."
+      }
+    ]
+  },
+  "Mystery & Crime": {
+    "genre": "Mystery & Crime",
+    "commonTropes": [
+      {
+        "name": "The Sealed Cipher",
+        "description": "Decoding a renaissance manuscript connected to modern murders.",
+        "subversionAngle": "The cipher exposes a secret royal heir living as a clockmaker.",
+        "emotionalPayoff": "Intellectual satisfaction and historical grandeur."
+      }
+    ]
+  },
+  "Action & Adventure": {
+    "genre": "Action & Adventure",
+    "commonTropes": [
+      {
+        "name": "Mercenary Extraction",
+        "description": "Rescuing a whistleblower from a fortress.",
+        "subversionAngle": "The whistleblower is an AI core that hired the mercenaries directly.",
+        "emotionalPayoff": "High-octane adrenaline and tactical glory."
+      }
+    ]
+  },
+  "Horror": {
+    "genre": "Horror",
+    "commonTropes": [
+      {
+        "name": "Paranormal Audio Signal",
+        "description": "A radio station intercepting eerie ghost broadcasts.",
+        "subversionAngle": "The radio station is broadcasting from the afterlife into the living world.",
+        "emotionalPayoff": "Cosmic dread and terrifying atmospheric thrill."
+      }
+    ]
+  },
+  "Historical Drama": {
+    "genre": "Historical Drama",
+    "commonTropes": [
+      {
+        "name": "Court Intrigue Cipher",
+        "description": "Intercepting royal letters during wartime.",
+        "subversionAngle": "The queen herself authored the cipher to sabotage her corrupt council.",
+        "emotionalPayoff": "Political brilliance and royal empowerment."
+      }
+    ]
+  }
+}

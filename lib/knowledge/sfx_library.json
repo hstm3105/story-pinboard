@@ -1,0 +1,14 @@
+{
+  "keywords": {
+    "rain": "/audio/sfx/rain.mp3",
+    "door": "/audio/sfx/door_creak.mp3",
+    "creak": "/audio/sfx/door_creak.mp3",
+    "footsteps": "/audio/sfx/footsteps.mp3",
+    "boots": "/audio/sfx/footsteps.mp3",
+    "blast": "/audio/sfx/blast_door.mp3",
+    "siren": "/audio/sfx/sirens.mp3",
+    "thunder": "/audio/sfx/thunder.mp3",
+    "heartbeat": "/audio/sfx/heartbeat.mp3",
+    "sparks": "/audio/sfx/sparks.mp3"
+  }
+}
