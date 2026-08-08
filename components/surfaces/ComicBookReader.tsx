@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProductionManifest } from '@/lib/types';
-import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, Maximize2, ZoomIn, ZoomOut, Image as ImageIcon, Layers } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, ZoomIn, ZoomOut, Image as ImageIcon, MapPin } from 'lucide-react';
 
 interface ComicBookReaderProps {
   manifest: ProductionManifest;
@@ -36,11 +36,11 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
 
   return (
     <div className="bg-slate border border-slate-border rounded-xl p-6 space-y-6 shadow-2xl">
-      {/* Header */}
+      {/* Surface Header */}
       <div className="flex items-center justify-between border-b border-slate-border pb-4">
         <div>
           <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 06 // FULL-PAGE GRAPHIC NOVEL READER
+            SURFACE 06 // GRAPHIC NOVEL PRODUCTION READER
           </span>
           <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
             {manifest.title} — Issue #{manifest.issueNum} ({manifest.visualStyle})
@@ -48,7 +48,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5" /> {manifest.totalPages} FULL COMIC PAGES
+            <ImageIcon className="w-3.5 h-3.5" /> {manifest.totalPages} GRAPHIC PAGES READY
           </span>
           {onApprove && (
             <button
@@ -83,7 +83,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
 
         {/* Page Indicator */}
         <div className="flex items-center gap-2">
-          <span className="text-surface-muted">COMIC PAGE</span>
+          <span className="text-surface-muted">PAGE</span>
           <span className="text-crimson font-bold text-base">{activePageIndex + 1}</span>
           <span className="text-surface-muted">OF {manifest.pages.length}</span>
         </div>
@@ -114,7 +114,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
       </div>
 
-      {/* FULL-PAGE COMIC CANVAS DISPLAY */}
+      {/* FULL-PAGE COMIC CANVAS DISPLAY (MARVEL/DC DESIGN LANGUAGE) */}
       {activePage && (
         <div className="bg-slate-elevated border-2 border-slate-border rounded-xl p-6 space-y-6 shadow-2xl relative overflow-hidden flex flex-col items-center">
           {/* Page Banner Header */}
@@ -125,11 +125,12 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
                 {activePage.pageTitle}
               </span>
             </div>
-            {activePage.isKeyframeSplashPage && (
-              <span className="font-mono text-xs bg-crimson/20 text-crimson border border-crimson/40 px-3 py-1 rounded font-bold uppercase">
-                FULL SPLASH PAGE
-              </span>
-            )}
+
+            {/* MARVEL/DC STYLE RED LOCATION HEADER BOX */}
+            <div className="bg-crimson text-white px-3.5 py-1 rounded font-display font-black text-xs uppercase tracking-widest border border-red-400 shadow-md flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>LOCATION: {manifest.title.toUpperCase()}</span>
+            </div>
           </div>
 
           {/* LITERAL FULL-PAGE COMIC ARTWORK IMAGE */}
@@ -152,28 +153,55 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
             </div>
           </div>
 
-          {/* SCRIPT PANEL BREAKDOWN DETAILS BELOW PAGE */}
+          {/* DYNAMIC AGENT DIALOGUE & PANEL BREAKDOWN (WITH MARVEL/DC SPEECH TAILS) */}
           <div className="w-full space-y-3 pt-4 border-t border-slate-border/60">
             <span className="font-mono text-xs text-gold uppercase block font-semibold flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-gold" /> PAGE #{activePage.pageNum} PANEL BREAKDOWN & DIALOGUE
+              <BookOpen className="w-4 h-4 text-gold" /> PAGE #{activePage.pageNum} DIALOGUE & LETTERING OVERLAY
             </span>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activePage.panels.map((panel) => (
-                <div key={panel.panelNum} className="bg-charcoal p-3.5 rounded-lg border border-slate-border/50 font-mono text-xs space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-crimson font-bold">PANEL #{panel.panelNum}</span>
+                <div key={panel.panelNum} className="bg-charcoal p-4 rounded-xl border border-slate-border/60 space-y-3 relative">
+                  <div className="flex items-center justify-between border-b border-slate-border/40 pb-2">
+                    <span className="font-mono text-xs text-crimson font-bold">PANEL #{panel.panelNum}</span>
                     {panel.visualSoundFX && (
-                      <span className="text-yellow-300 font-bold bg-red-600 px-2 py-0.5 rounded text-[10px]">
+                      <span className="font-display font-black text-xs text-yellow-300 bg-red-600 px-2.5 py-0.5 rounded uppercase tracking-wider shadow-md">
                         ⚡ {panel.visualSoundFX}
                       </span>
                     )}
                   </div>
-                  <p className="text-surface-muted text-[11px] font-sans italic">{panel.sceneDescription}</p>
-                  {panel.speechBubbles.map((sb) => (
-                    <div key={sb.id} className="bg-slate p-2 rounded text-[11px]">
-                      <span className="text-gold font-bold">{sb.speaker}:</span> "{sb.text}"
-                    </div>
-                  ))}
+                  <p className="text-surface-muted text-[11px] font-sans italic bg-slate/60 p-2.5 rounded border border-slate-border/30">
+                    {panel.sceneDescription}
+                  </p>
+
+                  {/* ROUND SPEECH BUBBLES WITH SVG TAIL POINTERS */}
+                  <div className="space-y-2 pt-1">
+                    {panel.speechBubbles.map((sb) => {
+                      if (sb.bubbleType === 'caption') {
+                        return (
+                          <div key={sb.id} className="bg-yellow-400 text-slate-950 font-mono text-xs font-bold p-2.5 rounded border border-yellow-600 shadow-md">
+                            <span className="text-[9px] uppercase font-black block text-yellow-950">NARRATION:</span>
+                            {sb.text}
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={sb.id} className="relative bg-white text-slate-950 font-sans text-xs font-bold p-3 rounded-2xl border-2 border-slate-900 shadow-lg">
+                          <span className="text-[10px] font-mono font-bold text-crimson block uppercase mb-0.5">
+                            {sb.speaker}:
+                          </span>
+                          "{sb.text}"
+                          {/* SVG Speech Bubble Pointer Tail */}
+                          <svg
+                            className="absolute -bottom-2.5 left-6 w-4 h-3 text-white"
+                            viewBox="0 0 10 10"
+                            fill="currentColor"
+                          >
+                            <path d="M0 0 L10 0 L5 10 Z" />
+                          </svg>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </div>
@@ -184,7 +212,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
       {/* FULL COMIC PAGE THUMBNAILS SELECTOR BAR */}
       <div className="space-y-2 pt-2">
         <span className="font-mono text-xs text-gold uppercase block font-semibold">
-          FULL COMIC PAGES THUMBNAILS:
+          ISSUE THUMBNAIL PAGES:
         </span>
         <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-thin">
           {manifest.pages.map((p, idx) => {
