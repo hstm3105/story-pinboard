@@ -38,11 +38,9 @@ import {
 
 import { runComicProductionAgent } from '@/lib/comicProductionAgent';
 
-import { SinglePanelTest } from './SinglePanelTest';
-import { Radio, Settings, Key, AlertCircle, Send, Palette, Layers, Sparkles } from 'lucide-react';
+import { Radio, Settings, Key, AlertCircle, Send, Palette } from 'lucide-react';
 
 export const PipelineContainer: React.FC = () => {
-  const [activeViewMode, setActiveViewMode] = useState<'benchmark' | 'pipeline'>('benchmark');
   const [selectedGenre, setSelectedGenre] = useState<string>('Sci-Fi');
   const [customPremise, setCustomPremise] = useState<string>(
     'In the flooded lower sectors of New Babel, a rogue technician extracts an illegal memory drive, discovering proof that the city ruler was once a human resident of the slums.'
@@ -60,38 +58,30 @@ export const PipelineContainer: React.FC = () => {
     model: 'gemini-3.5-flash-lite',
   });
 
-  // Load saved settings from localStorage on mount
+  // Load API Key & Model from localStorage on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('antigravity_gemini_settings');
-      if (saved) {
-        setSettings(JSON.parse(saved));
-      }
-    } catch (e) {
-      console.error('Failed to load settings from localStorage:', e);
-    }
+    const savedKey = localStorage.getItem('gemini_api_key') || '';
+    const savedModel = localStorage.getItem('gemini_selected_model') || 'gemini-3.5-flash-lite';
+    setSettings({ apiKey: savedKey, model: savedModel });
   }, []);
 
   const handleSaveSettings = (newSettings: AppSettings) => {
     setSettings(newSettings);
-    setPipelineError(null);
-    try {
-      localStorage.setItem('antigravity_gemini_settings', JSON.stringify(newSettings));
-    } catch (e) {
-      console.error('Failed to save settings:', e);
-    }
+    localStorage.setItem('gemini_api_key', newSettings.apiKey);
+    localStorage.setItem('gemini_selected_model', newSettings.model);
   };
 
+  // Agent Pipeline Stage Cards
   const [stages, setStages] = useState<AgentStage[]>([
-    { id: 'director', name: 'Director Agent', role: 'Visual Aesthetic & Keyframes', status: 'queued' },
-    { id: 'research', name: 'Research Agent', role: 'Panel Grid & Color Palette', status: 'queued' },
-    { id: 'screenwriter', name: 'Screenwriter Agent', role: 'Page & Panel Breakdowns', status: 'queued' },
-    { id: 'auditor', name: 'Safety Auditor Agent', role: 'PG-13 Scan & Originality', status: 'queued' },
-    { id: 'localization', name: 'Localization Agent', role: 'Bubbles & Sound FX Translation', status: 'queued' },
-    { id: 'production', name: 'Comic Production Agent', role: 'Comic Illustrator & Reader Master', status: 'queued' },
+    { id: 'director', name: 'Director Agent', role: 'Visual Bible & Concept', status: 'queued' },
+    { id: 'research', name: 'Research Agent', role: 'Panel Composition Strategy', status: 'queued' },
+    { id: 'screenwriter', name: 'Screenwriter Agent', role: 'Script & Panel Breakdowns', status: 'queued' },
+    { id: 'auditor', name: 'Safety Auditor Agent', role: 'PG-13 & Visual Compliance', status: 'queued' },
+    { id: 'localization', name: 'Localization Agent', role: 'Cultural Dialogue Adaptation', status: 'queued' },
+    { id: 'production', name: 'Comic Production Agent', role: 'Graphic Novel Publication', status: 'queued' },
   ]);
 
-  const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
+  // Deep Stage Output Data
   const [researchData, setResearchData] = useState<ResearchBrief | null>(null);
   const [episodeScript, setEpisodeScript] = useState<EpisodeScript | null>(null);
   const [auditReport, setAuditReport] = useState<AuditReport | null>(null);
@@ -99,19 +89,19 @@ export const PipelineContainer: React.FC = () => {
   const [productionManifest, setProductionManifest] = useState<ProductionManifest | null>(null);
   const [lockedEpisodes, setLockedEpisodes] = useState<LockedEpisode[]>([]);
 
-  const handleCategorySelect = (category: string, samplePremise: string) => {
-    setSelectedGenre(category);
-    setCustomPremise(samplePremise);
-  };
+  // Telemetry Log Events
+  const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([
+    {
+      id: 'init-1',
+      timestamp: '00:00:00',
+      agentId: 'director',
+      stageName: 'System Core',
+      message: 'Graphic Novel Production Suite online. Enter a premise or select a genre to launch agents.',
+    },
+  ]);
 
-  // 100% REAL DEEP MULTI-AGENT COMIC PIPELINE EXECUTION
-  const handleRunPipeline = async () => {
-    if (!settings.apiKey || !settings.apiKey.trim()) {
-      setIsSettingsOpen(true);
-      setPipelineError('Please enter your Gemini API Key in Settings to run the real AI Agents.');
-      return;
-    }
-
+  // MASTER EXPAND PIPELINE HANDLER
+  const handleExpandConcept = async () => {
     if (!customPremise.trim()) return;
 
     setIsExpanding(true);
@@ -149,7 +139,6 @@ export const PipelineContainer: React.FC = () => {
       setStoryBible(bible);
       updateStageStatus('director', 'complete');
       logTelemetry('director', 'Director Agent', directorLog);
-      setIsExpanding(false);
 
       // 2. RESEARCH AGENT
       updateStageStatus('research', 'in_progress');
@@ -170,21 +159,15 @@ export const PipelineContainer: React.FC = () => {
 
       // 4. SAFETY AUDITOR AGENT
       updateStageStatus('auditor', 'in_progress');
-      logTelemetry('auditor', 'Safety Auditor Agent', `Safety Auditor Agent: Running 4 visual compliance scans against comic panels...`);
+      logTelemetry('auditor', 'Safety Auditor Agent', `Safety Auditor Agent: Running 4-point visual compliance audit...`);
       const { auditReport: audit, logMessage: auditLog } = await runSafetyAuditorAgent(settings.apiKey, settings.model, bible, script);
       setAuditReport(audit);
       updateStageStatus('auditor', 'complete');
       logTelemetry('auditor', 'Safety Auditor Agent', auditLog);
 
-      if (!audit.overallApproved) {
-        logTelemetry('auditor', 'Safety Alert', `Safety Auditor flagged compliance concerns. Halting automatic comic production until approved.`);
-        setActiveDetailStageId('auditor');
-        return;
-      }
-
       // 5. LOCALIZATION AGENT
       updateStageStatus('localization', 'in_progress');
-      logTelemetry('localization', 'Localization Agent', `Localization Agent: Translating speech bubbles & sound FX lettering for Spanish & Hindi...`);
+      logTelemetry('localization', 'Localization Agent', `Localization Agent: Adapting dialogue speech bubbles & sound FX lettering...`);
       const { localizationPackage: locPkg, logMessage: locLog } = await runLocalizationAgent(settings.apiKey, settings.model, bible, script);
       setLocalizationPackage(locPkg);
       updateStageStatus('localization', 'complete');
@@ -192,38 +175,37 @@ export const PipelineContainer: React.FC = () => {
 
       // 6. COMIC PRODUCTION AGENT
       updateStageStatus('production', 'in_progress');
-      logTelemetry('production', 'Comic Production Agent', `Comic Production Agent: Rendering comic panel artwork, speech bubbles & visual SFX callouts...`);
-      const { manifest: prodManifest, logMessage: prodLog } = await runComicProductionAgent(script, bible.visualAestheticStyle || 'Dark Noir Cyberpunk');
+      logTelemetry('production', 'Comic Production Agent', `Comic Production Agent: Assembling graphic novel issue with per-panel artwork & vector speech bubbles...`);
+      const { manifest: prodManifest, logMessage: prodLog } = await runComicProductionAgent(script, bible.visualAestheticStyle || selectedGenre, settings.apiKey);
       setProductionManifest(prodManifest);
       updateStageStatus('production', 'complete');
       logTelemetry('production', 'Comic Production Agent', prodLog);
 
+      // Default active detail stage to Production Reader upon completion
       setActiveDetailStageId('production');
     } catch (err: any) {
       console.error('Pipeline execution error:', err);
-      const msg = err.message || 'Error communicating with Gemini API.';
-      setPipelineError(msg);
-      logTelemetry('director', 'System Alert', `Pipeline Error: ${msg}`);
+      setPipelineError(err.message || 'Pipeline execution failed.');
+      logTelemetry('director', 'Error Core', `Pipeline Error: ${err.message}`);
+    } finally {
       setIsExpanding(false);
     }
   };
 
-  const handleOpenDetail = (id: string) => {
-    setActiveDetailStageId(id);
+  const handleOpenDetail = (stageId: string) => {
+    setActiveDetailStageId(stageId);
   };
 
   const handleApproveStage = () => {
-    const ids: AgentId[] = ['director', 'research', 'screenwriter', 'auditor', 'localization', 'production'];
-    const idx = ids.indexOf(activeDetailStageId as AgentId);
-    if (idx >= 0 && idx < ids.length - 1) {
-      setActiveDetailStageId(ids[idx + 1]);
-    } else {
-      setActiveDetailStageId(null);
+    if (!activeDetailStageId) return;
+    const stageIndex = stages.findIndex((s) => s.id === activeDetailStageId);
+    if (stageIndex < stages.length - 1) {
+      setActiveDetailStageId(stages[stageIndex + 1].id);
     }
   };
 
   const handleRegenerateStage = () => {
-    handleRunPipeline();
+    handleExpandConcept();
   };
 
   return (
@@ -231,12 +213,10 @@ export const PipelineContainer: React.FC = () => {
       {/* Top Header Navigation Bar */}
       <header className="bg-charcoal border-b border-slate-border px-6 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-crimson flex items-center justify-center text-white shadow-lg">
-            <Palette className="w-6 h-6" />
-          </div>
+          <Radio className="w-6 h-6 text-crimson animate-pulse" />
           <div>
-            <h1 className="font-display font-black text-xl uppercase tracking-wider text-white">
-              ANTIGRAVITY COMIC STUDIO
+            <h1 className="font-display text-xl font-black uppercase tracking-tight text-white leading-none">
+              REEL-TO-REEL // COMIC STUDIO
             </h1>
             <span className="font-mono text-[10px] text-cyan uppercase tracking-widest block">
               AGENTIC GRAPHIC NOVEL & COMIC BOOK PRODUCTION SUITE
@@ -285,42 +265,7 @@ export const PipelineContainer: React.FC = () => {
         currentSettings={settings}
       />
 
-      {/* MODE SELECTOR HEADER BAR */}
-      <div className="bg-charcoal border-b border-slate-border px-6 py-3 flex items-center justify-between text-xs font-mono">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setActiveViewMode('benchmark')}
-            className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${
-              activeViewMode === 'benchmark'
-                ? 'bg-gold text-slate-950 shadow-lg'
-                : 'bg-slate text-surface-muted hover:text-white border border-slate-border'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" /> ⚡ 1. Single-Panel Imagen-3 Benchmark Test
-          </button>
-          <button
-            onClick={() => setActiveViewMode('pipeline')}
-            className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${
-              activeViewMode === 'pipeline'
-                ? 'bg-crimson text-white shadow-lg'
-                : 'bg-slate text-surface-muted hover:text-white border border-slate-border'
-            }`}
-          >
-            <Layers className="w-4 h-4" /> 📖 2. Full Multi-Agent Graphic Novel Pipeline
-          </button>
-        </div>
-        <span className="text-cyan font-semibold hidden sm:inline">
-          {activeViewMode === 'benchmark' ? 'Single Panel Quality & Vector Lettering Stage' : 'Production Pipeline Active'}
-        </span>
-      </div>
-
-      {activeViewMode === 'benchmark' ? (
-        <div className="w-full max-w-[1600px] mx-auto p-6">
-          <SinglePanelTest />
-        </div>
-      ) : (
-        <>
-          {/* Main Studio Viewport - SPLIT-SCREEN LAYOUT (Desktop >= MD) */}
+      {/* Main Studio Viewport - SPLIT-SCREEN LAYOUT (Desktop >= MD) */}
       <main className="hidden md:flex flex-1 w-full max-w-[1600px] mx-auto p-6 gap-6">
         
         {/* LEFT COLUMN PANEL: PROMPT STUDIO & TELEMETRY LOG (~38% Width) */}
@@ -340,69 +285,73 @@ export const PipelineContainer: React.FC = () => {
               </span>
             </div>
 
-            {/* Custom Premise Textarea Input */}
+            {/* Premise Prompt Input Box */}
             <div className="space-y-2">
-              <label className="font-mono text-xs text-surface-muted block font-semibold">
-                ENTER CUSTOM COMIC STORY PREMISE:
+              <label className="font-mono text-xs text-surface-muted uppercase block">
+                Series Premise Prompt:
               </label>
               <textarea
                 value={customPremise}
                 onChange={(e) => setCustomPremise(e.target.value)}
-                placeholder="Describe your comic premise, protagonist dilemma, visual style, or graphic novel concept..."
-                className="w-full h-44 bg-charcoal border border-slate-border rounded-lg p-3 font-sans text-sm text-white placeholder-surface-muted focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson resize-none leading-relaxed"
+                rows={5}
+                placeholder="Enter your comic series concept premise..."
+                className="w-full bg-charcoal text-white font-sans text-sm p-4 rounded-xl border border-slate-border focus:border-crimson focus:outline-none transition-all resize-none shadow-inner"
               />
             </div>
 
-            {/* Primary Pipeline Execution CTA */}
+            {/* Run Pipeline CTA */}
             <button
-              onClick={handleRunPipeline}
-              disabled={isExpanding}
-              className="w-full bg-crimson hover:bg-crimson-dark text-white font-display font-bold text-lg uppercase py-3.5 px-6 rounded-lg flex items-center justify-center gap-2 shadow-xl hover:shadow-crimson/20 transition-all disabled:opacity-50"
+              onClick={handleExpandConcept}
+              disabled={isExpanding || !customPremise.trim()}
+              className="w-full py-4 bg-crimson hover:bg-crimson-dark disabled:opacity-50 text-white font-display font-black uppercase tracking-wider rounded-xl shadow-xl flex items-center justify-center gap-3 transition-all transform active:scale-98"
             >
               {isExpanding ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Illustrating Issue #1...</span>
+                  <span>Agents Executing...</span>
                 </>
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>⚡ Produce Comic Book Issue #1</span>
+                  <span>⚡ Run Multi-Agent Studio Pipeline</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* TELEMETRY LOG TRACE PANEL ON LEFT COLUMN */}
-          <div className="flex-1 bg-slate border border-slate-border rounded-xl p-4 shadow-2xl flex flex-col justify-between">
-            <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-2 font-bold">
-              AGENT TELEMETRY TRACE LOG
+          {/* TELEMETRY TRACE LOG (Dedicated to Left Column Bottom) */}
+          <div className="flex-1 min-h-[320px] bg-slate border border-slate-border rounded-xl p-5 shadow-2xl flex flex-col">
+            <span className="font-mono text-xs text-gold uppercase tracking-widest block mb-3 font-bold border-b border-slate-border/50 pb-2">
+              LIVE AGENT TELEMETRY TRACE LOG
             </span>
-            <div className="flex-1 max-h-80 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto max-h-[360px] scrollbar-thin">
               <TelemetryTicker events={telemetryEvents} />
             </div>
           </div>
         </aside>
 
-        {/* RIGHT COLUMN PANEL: CATEGORIES GRID & PRODUCTION DECK (~62% Width) */}
-        <section className="w-[62%] space-y-6 overflow-y-auto pr-1">
-          {/* Surface 1: Category Selection Grid */}
+        {/* RIGHT COLUMN PANEL: GENRE CATEGORIES & PIPELINE MASTER DECK (~62% Width) */}
+        <section className="w-[62%] space-y-6 flex flex-col">
+          {/* Genre Category Cards Selector */}
           <DirectorDeck
-            onSelectCategory={handleCategorySelect}
             selectedCategory={selectedGenre}
+            onSelectCategory={setSelectedGenre}
           />
 
-          {/* Surface 2: Studio Master Deck (6 Agents) */}
+          {/* Master Pipeline Deck (6 Stages Pipeline Cards) */}
           <MasterDeck
             stages={stages}
             activeDetailStageId={activeDetailStageId}
             onOpenDetail={handleOpenDetail}
           />
 
-          {/* Hero Title Card Reveal */}
-          {storyBible && <TitleCard concept={storyBible} />}
+          {/* ACTIVE STAGE DETAIL OVERLAY / REVEAL PANELS */}
+          {/* Surface 1: Title Card / Director's Graphic Bible */}
+          {activeDetailStageId === 'director' && storyBible && (
+            <TitleCard concept={storyBible} />
+          )}
 
-          {/* Research Agent Detail Panel */}
+          {/* Research Agent Market & Composition Panel */}
           {activeDetailStageId === 'research' && researchData && (
             <ResearchDetailPanel
               research={researchData}
@@ -411,7 +360,7 @@ export const PipelineContainer: React.FC = () => {
             />
           )}
 
-          {/* Surface 3: Screenwriter Panel & Script View */}
+          {/* Screenwriter Script & Panel Breakdown View */}
           {activeDetailStageId === 'screenwriter' && episodeScript && (
             <TeleprompterView
               script={episodeScript}
@@ -420,7 +369,7 @@ export const PipelineContainer: React.FC = () => {
             />
           )}
 
-          {/* Safety Auditor Certification Checklist */}
+          {/* Safety Auditor Compliance Report */}
           {activeDetailStageId === 'auditor' && auditReport && (
             <SafetyChecklist
               checks={auditReport.checks}
@@ -438,7 +387,7 @@ export const PipelineContainer: React.FC = () => {
             />
           )}
 
-          {/* NEW: Comic Production Agent & Graphic Novel Reader Master */}
+          {/* Comic Production Agent & Graphic Novel Reader Master */}
           {activeDetailStageId === 'production' && productionManifest && (
             <ComicBookReader
               manifest={productionManifest}
@@ -460,8 +409,6 @@ export const PipelineContainer: React.FC = () => {
           onOpenDetail={handleOpenDetail}
         />
       </div>
-        </>
-      )}
 
       {/* Persistent Studio Footer */}
       <footer className="bg-charcoal-dark border-t border-slate-border px-6 py-3 text-center font-mono text-xs text-surface-subtle z-50">

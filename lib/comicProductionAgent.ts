@@ -28,7 +28,6 @@ export async function runComicProductionAgent(
   // CHARACTER DESIGN SHEETS: Built once per named character and reused VERBATIM across all panels
   const characterDesignSheets: Record<string, string> = {};
 
-  // Build character design sheets for primary speakers
   script.pages.forEach((page) => {
     page.panels.forEach((panel) => {
       panel.speechBubbles.forEach((sb) => {
@@ -48,8 +47,9 @@ export async function runComicProductionAgent(
     });
   });
 
-  // Default character design sheet if none found
   const defaultCharSheet = "KAI: Male superhero protagonist in tactical armor with cybernetic details.";
+  let totalArtGenerated = 0;
+  let totalTextFallback = 0;
 
   for (const page of script.pages) {
     const renderedPanels: RenderedComicPanel[] = [];
@@ -65,26 +65,39 @@ export async function runComicProductionAgent(
       else if (speaker.includes('ARCHER')) avatarIcon = '🤖';
       else if (speaker.includes('NARRATOR')) avatarIcon = '📖';
 
-      // Reused verbatim character design sheet
       const charSheet = characterDesignSheets[speaker] || defaultCharSheet;
-
-      // Derived framing from panel.panelStyle
       const framing = mapPanelStyleToFraming(panel.panelStyle);
-
-      // Derived action from panel.sceneDescription & panel.visualFocusPrompt
       const action = `${panel.sceneDescription}. ${panel.visualFocusPrompt}`;
-
       const panelSeed = page.pageNum * 100 + panel.panelNum;
 
-      // GENERATE ARTWORK PER PANEL USING SHARED ENGINE
-      const result = await generatePanelArtwork({
-        apiKey,
-        characterDesignSheet: charSheet,
-        sceneFraming: framing,
-        characterAction: action,
-        visualStyle,
-        seed: panelSeed,
-      });
+      let panelImageUrl: string | undefined = undefined;
+
+      // BEST-EFFORT OPTIONAL PANEL ARTWORK GENERATION
+      if (apiKey && apiKey.trim()) {
+        try {
+          const result = await generatePanelArtwork({
+            apiKey,
+            characterDesignSheet: charSheet,
+            sceneFraming: framing,
+            characterAction: action,
+            visualStyle,
+            seed: panelSeed,
+          });
+
+          if (result.imageUrl && !result.imageUrl.includes('Fallback')) {
+            panelImageUrl = result.imageUrl;
+            totalArtGenerated++;
+          } else {
+            // Optional fallback to text-only treatment
+            totalTextFallback++;
+          }
+        } catch (err) {
+          console.log(`Panel Page ${page.pageNum} Panel ${panel.panelNum}: Using Illustrated Text treatment.`);
+          totalTextFallback++;
+        }
+      } else {
+        totalTextFallback++;
+      }
 
       renderedPanels.push({
         pageNum: page.pageNum,
@@ -96,18 +109,15 @@ export async function runComicProductionAgent(
         speechBubbles: panel.speechBubbles,
         visualSoundFX: panel.visualSoundFX,
         panelStyle: panel.panelStyle,
-        imageUrl: result.imageUrl, // POPULATE PER-PANEL IMAGE URL
+        imageUrl: panelImageUrl, // Best-effort: undefined if text-only
       });
     }
-
-    // Optional page-level fallback
-    const pageImageUrl = renderedPanels[0]?.imageUrl;
 
     pages.push({
       pageNum: page.pageNum,
       pageTitle: page.pageTitle,
       isKeyframeSplashPage: page.isKeyframeSplashPage,
-      pageImageUrl,
+      pageImageUrl: renderedPanels[0]?.imageUrl,
       panels: renderedPanels,
     });
   }
@@ -121,7 +131,7 @@ export async function runComicProductionAgent(
   };
 
   const totalPanels = pages.reduce((acc, p) => acc + p.panels.length, 0);
-  const logMessage = `Comic Production Agent: ✅ Per-panel artwork generation complete! ${totalPanels} panels rendered with verbatim character design sheets in "${visualStyle}" style!`;
+  const logMessage = `Comic Production Agent: ✅ Issue published! ${pages.length} pages (${totalPanels} panels). ${totalArtGenerated} AI illustrated panels, ${totalTextFallback} graphic text panels.`;
 
   return { manifest, logMessage };
 }

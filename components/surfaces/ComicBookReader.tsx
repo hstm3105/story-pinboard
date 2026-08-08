@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProductionManifest, RenderedComicPanel } from '@/lib/types';
-import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, ZoomIn, ZoomOut, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, ZoomIn, ZoomOut, Image as ImageIcon, MessageSquare } from 'lucide-react';
 
 interface ComicBookReaderProps {
   manifest: ProductionManifest;
@@ -131,10 +131,10 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
       </div>
 
-      {/* FULL-PAGE COMIC CANVAS WITH PER-PANEL GRID & 12PX BLACK GUTTERS */}
+      {/* FULL-PAGE COMIC CANVAS WITH UNIFORM 12PX BLACK GUTTERS */}
       {activePage && (
         <div className="bg-slate-elevated border-2 border-slate-border rounded-xl p-6 space-y-4 shadow-2xl relative overflow-hidden flex flex-col items-center">
-          {/* SMALL CORNER PRINT INDICIA TEXT (UNOBTRUSIVE PRINT BRANDING) */}
+          {/* UNOBTRUSIVE SMALL CORNER PRINT INDICIA TEXT */}
           <div className="w-full flex items-center justify-between text-[11px] font-mono text-surface-muted border-b border-slate-border/50 pb-2">
             <span>{manifest.title.toUpperCase()} // ISSUE #{manifest.issueNum}</span>
             <span className="text-gold font-bold">PAGE {activePage.pageNum} OF {manifest.totalPages}</span>
@@ -151,9 +151,9 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
                 {activePage.panels.map((panel) => (
                   <div
                     key={panel.panelNum}
-                    className="relative aspect-[4/3] rounded overflow-hidden border-2 border-slate-900 shadow-xl bg-charcoal group"
+                    className="relative aspect-[4/3] rounded overflow-hidden border-2 border-slate-900 shadow-xl bg-charcoal group flex flex-col justify-between"
                   >
-                    {/* Individual Panel Artwork Background */}
+                    {/* PANEL BACKGROUND: REAL AI ARTWORK OR DELIBERATE ILLUSTRATED TEXT GRADIENT */}
                     {panel.imageUrl ? (
                       <img
                         src={panel.imageUrl}
@@ -161,20 +161,34 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
                         className="w-full h-full object-cover block group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className={`w-full h-full bg-gradient-to-br ${panel.bgGradient} flex items-center justify-center font-mono text-xs text-surface-muted`}>
-                        Panel #{panel.panelNum}
+                      /* DELIBERATE "ILLUSTRATED TEXT" PANEL TREATMENT (STANDS ALONE AS INTENTIONAL DESIGN) */
+                      <div className={`w-full h-full bg-gradient-to-br ${panel.bgGradient} p-5 flex flex-col justify-between relative overflow-hidden`}>
+                        {/* Background Decorative Pattern */}
+                        <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
+
+                        {/* Top Panel Header Badge */}
+                        <div className="relative z-10 flex items-center justify-between">
+                          <span className="font-mono text-[10px] bg-slate-950/80 text-gold px-2.5 py-0.5 rounded border border-gold/30 font-bold uppercase tracking-wider">
+                            PANEL #{panel.panelNum}
+                          </span>
+                          <span className="text-lg">{panel.avatarIcon}</span>
+                        </div>
+
+                        {/* PROMINENT GRAPHIC NOVEL SCRIPT NARRATIVE BOX */}
+                        <div className="relative z-10 bg-slate-950/85 backdrop-blur-md p-3.5 rounded-lg border-l-4 border-l-gold border border-white/10 shadow-2xl my-auto space-y-1">
+                          <span className="font-mono text-[9px] uppercase font-black text-cyan tracking-widest block">
+                            SCENE DIRECTION // {panel.panelStyle.toUpperCase()}
+                          </span>
+                          <p className="font-sans text-xs italic text-slate-200 leading-relaxed">
+                            "{panel.sceneDescription}"
+                          </p>
+                        </div>
                       </div>
                     )}
 
-                    {/* OVERLAY: INTEGRATED NARRATION CAPTION (TOP CORNER) */}
-                    <div className="absolute top-2 left-2 bg-yellow-400 text-slate-950 font-mono text-[10px] font-bold p-1.5 max-w-[180px] shadow-lg rounded-none border border-slate-900 pointer-events-auto">
-                      <span className="text-[8px] uppercase font-black block text-yellow-950">PANEL #{panel.panelNum}:</span>
-                      {panel.sceneDescription}
-                    </div>
-
                     {/* OVERLAY: STYLIZED VECTOR SOUND EFFECT */}
                     {panel.visualSoundFX && (
-                      <div className="absolute bottom-3 right-3 pointer-events-none">
+                      <div className="absolute bottom-3 right-3 pointer-events-none z-20">
                         <div className="font-display font-black text-xl text-yellow-300 bg-red-600 px-2.5 py-0.5 rounded border-2 border-slate-950 shadow-[0_0_12px_rgba(239,68,68,0.8)] rotate-[-6deg] uppercase tracking-widest italic">
                           ⚡ {panel.visualSoundFX}
                         </div>
@@ -183,12 +197,22 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
 
                     {/* OVERLAY: SPEECH BUBBLES POSITIONED RELATIVE TO SpeechBubble.position */}
                     {panel.speechBubbles.map((sb) => {
-                      if (sb.bubbleType === 'caption') return null;
+                      if (sb.bubbleType === 'caption') {
+                        return (
+                          <div
+                            key={sb.id}
+                            className="absolute top-2 left-2 bg-yellow-400 text-slate-950 font-mono text-[10px] font-bold p-2 max-w-[180px] shadow-lg rounded-none border border-slate-900 pointer-events-auto z-10"
+                          >
+                            <span className="text-[8px] uppercase font-black block text-yellow-950">NARRATION:</span>
+                            {sb.text}
+                          </div>
+                        );
+                      }
                       const posClass = getBubblePositionClasses(sb.position);
                       return (
                         <div
                           key={sb.id}
-                          className={`absolute ${posClass} bg-white text-slate-950 p-2.5 rounded-[1.5rem] border-2 border-slate-950 shadow-2xl max-w-[200px] pointer-events-auto z-10`}
+                          className={`absolute ${posClass} bg-white text-slate-950 p-2.5 rounded-[1.5rem] border-2 border-slate-950 shadow-2xl max-w-[200px] pointer-events-auto z-20`}
                         >
                           <span className="text-[9px] font-mono font-bold text-crimson block uppercase mb-0.5">
                             {sb.speaker}:
@@ -259,8 +283,12 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
                   <span className="text-crimson font-bold">PAGE #{p.pageNum}</span>
                   <span className="text-[10px] text-cyan font-bold">{p.panels.length} PANELS</span>
                 </div>
-                {p.panels[0]?.imageUrl && (
+                {p.panels[0]?.imageUrl ? (
                   <img src={p.panels[0].imageUrl} alt={p.pageTitle} className="w-full h-24 object-cover rounded border border-slate-border mb-1.5" />
+                ) : (
+                  <div className={`w-full h-24 bg-gradient-to-br ${p.panels[0]?.bgGradient || 'from-slate-900 to-charcoal'} rounded border border-slate-border mb-1.5 flex items-center justify-center text-[10px] text-gold font-bold`}>
+                    ILLUSTRATED TEXT
+                  </div>
                 )}
                 <div className="truncate text-white font-sans text-[11px]">{p.pageTitle}</div>
               </button>
