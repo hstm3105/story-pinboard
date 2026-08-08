@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { LocalizedLanguageProfile } from '@/lib/types';
-import { CheckCircle2, RefreshCw, Mic, Globe, Compass, BookOpen } from 'lucide-react';
+import { CheckCircle2, RefreshCw, Globe, Compass, MessageSquare, Zap } from 'lucide-react';
 
 interface LocalizationGridProps {
   notes: LocalizedLanguageProfile[];
@@ -23,7 +23,7 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
             SURFACE 05 // LOCALIZATION AGENT DETAIL VIEW
           </span>
           <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
-            Deep Cultural Adaptation & Global Dubbing Suite
+            Comic Speech Bubble & Sound FX Lettering Localization
           </h2>
         </div>
         <div className="flex items-center gap-3">
@@ -31,13 +31,13 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
             onClick={onRegenerate}
             className="font-mono text-xs text-surface-muted hover:text-surface-text px-3 py-1.5 rounded bg-charcoal border border-slate-border flex items-center gap-1.5"
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Regenerate Cultural Notes
+            <RefreshCw className="w-3.5 h-3.5" /> Regenerate Lettering Notes
           </button>
           <button
             onClick={onApprove}
             className="font-mono text-xs font-bold text-charcoal bg-gold hover:bg-gold/90 px-4 py-1.5 rounded flex items-center gap-1.5 shadow-md"
           >
-            <CheckCircle2 className="w-4 h-4" /> Finalize Production
+            <CheckCircle2 className="w-4 h-4" /> Finalize Publication
           </button>
         </div>
       </div>
@@ -71,63 +71,53 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
               <span className="text-3xl">{activeNote.flag}</span>
               <div>
                 <h3 className="font-display font-bold text-xl uppercase text-white">
-                  {activeNote.language} Cultural Adaptation Profile
+                  {activeNote.language} Comic Adaptation Profile
                 </h3>
                 <span className="font-sans text-xs text-gold italic">{activeNote.translatedTitle}</span>
               </div>
             </div>
             <span className="font-mono text-xs text-cyan bg-cyan/10 px-3 py-1 rounded border border-cyan/30 flex items-center gap-1">
-              <Globe className="w-3.5 h-3.5" /> DEEP LOCALIZATION READY
+              <Globe className="w-3.5 h-3.5" /> COMIC LETTERING READY
             </span>
           </div>
 
-          {/* LOCALIZED CHARACTER NAMES */}
-          {activeNote.localizedCharacterNames && activeNote.localizedCharacterNames.length > 0 && (
+          {/* LOCALIZED SPEECH BUBBLES */}
+          {activeNote.localizedSpeechBubbles && activeNote.localizedSpeechBubbles.length > 0 && (
             <div className="space-y-2">
               <span className="font-mono text-xs text-gold uppercase block font-semibold flex items-center gap-1.5">
-                <Compass className="w-4 h-4 text-gold" /> CULTURALLY ADAPTED CHARACTER NAMES
+                <MessageSquare className="w-4 h-4 text-gold" /> LOCALIZED SPEECH BUBBLES
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {activeNote.localizedCharacterNames.map((cn, idx) => (
-                  <div key={idx} className="bg-slate p-3 rounded-lg border border-slate-border/50 font-mono text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-surface-muted">{cn.originalName}</span>
-                      <span className="text-crimson font-bold">➔ {cn.localizedName}</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {activeNote.localizedSpeechBubbles.map((sb, idx) => (
+                  <div key={idx} className="bg-slate p-3.5 rounded-lg border border-slate-border/50 font-mono text-xs space-y-1">
+                    <div className="flex items-center justify-between text-crimson font-bold">
+                      <span>{sb.speaker}</span>
+                      <span className="text-[10px] text-surface-subtle">SPEECH BUBBLE</span>
                     </div>
-                    <p className="text-surface-text text-[11px] font-sans italic">{cn.culturalNuance}</p>
+                    <div className="text-surface-muted text-[11px]">Original: "{sb.originalText}"</div>
+                    <div className="text-white font-bold font-sans">"{sb.localizedText}"</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ADAPTED CULTURAL IDIOMS */}
-          {activeNote.adaptedCulturalIdioms && activeNote.adaptedCulturalIdioms.length > 0 && (
+          {/* LOCALIZED SOUND FX LETTERING */}
+          {activeNote.localizedSoundFXLettering && (
             <div className="space-y-2">
               <span className="font-mono text-xs text-cyan uppercase block font-semibold flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4 text-cyan" /> REGIONAL PROVERBS & CULTURAL IDIOM ADAPTATIONS
+                <Zap className="w-4 h-4 text-cyan" /> VISUAL SOUND EFFECT LETTERING ANNOTATIONS
               </span>
-              <div className="space-y-2">
-                {activeNote.adaptedCulturalIdioms.map((idm, idx) => (
-                  <div key={idx} className="bg-slate p-3 rounded-lg border border-slate-border/50 font-mono text-xs space-y-1">
-                    <div className="text-surface-muted">Original: "{idm.originalPhrase}"</div>
-                    <div className="text-white font-bold">Adapted: "{idm.localizedIdiom}"</div>
-                    <p className="text-cyan text-[11px] font-sans">{idm.culturalContext}</p>
+              <div className="flex flex-wrap gap-3">
+                {Object.entries(activeNote.localizedSoundFXLettering).map(([orig, loc]) => (
+                  <div key={orig} className="bg-slate px-3.5 py-2 rounded-lg border border-slate-border/50 font-mono text-xs flex items-center gap-2">
+                    <span className="text-surface-muted line-through">{orig}</span>
+                    <span className="text-gold font-black uppercase text-sm font-display">➔ {loc}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
-          {/* CULTURALLY ADAPTED SCRIPT TEXT */}
-          <div className="pt-2">
-            <span className="font-mono text-xs text-white block mb-1 uppercase font-bold">
-              CULTURALLY ADAPTED SCRIPT SCENE:
-            </span>
-            <div className="bg-slate p-4 rounded-lg border border-slate-border font-sans text-sm text-white leading-relaxed italic">
-              {activeNote.culturallyAdaptedScriptText}
-            </div>
-          </div>
         </div>
       )}
     </div>

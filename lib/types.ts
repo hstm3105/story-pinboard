@@ -23,19 +23,12 @@ export interface TelemetryEvent {
   message: string;
 }
 
-// 1. STORY BIBLE SCHEMA (Director Agent - Dynamic Episode Count & Season Arc)
-export interface ActBreakdown {
-  actNumber: 1 | 2 | 3;
-  title: string;
-  turningPoint: string;
-  synopsis: string;
-}
-
-export interface SeasonBeat {
-  episodeNum: number;
-  title: string;
-  isCoinWall: boolean;
-  dramaticBeatSummary: string;
+// 1. STORY BIBLE SCHEMA (Director Agent - Visual Comic Book Aesthetic & World Arc)
+export interface CharacterVisualKeyframe {
+  characterName: string;
+  visualAppearance: string;
+  signatureCostume: string;
+  colorTheme: string;
 }
 
 export interface StoryBible {
@@ -43,15 +36,15 @@ export interface StoryBible {
   title: string;
   tagline: string;
   expandedPremise: string;
+  visualAestheticStyle: 'Dark Noir Cyberpunk' | 'Manga Anime' | 'Silver Age Superhero' | 'Watercolor High Fantasy' | 'Indie Graphic Novel';
+  characterVisualKeyframes: CharacterVisualKeyframe[];
   protagonistStartingEmotionalState: string;
   protagonistEndingEmotionalState: string;
   toneMoodDescriptors: string[];
-  actBreakdown: ActBreakdown[];
-  estimatedSeasonEpisodeCount: number;  // DYNAMICALLY REASONED (8-24 episodes)
-  fullSeasonOutline: SeasonBeat[];       // Complete season beat outline matching episode count
+  estimatedSeasonEpisodeCount: number;
 }
 
-// 2. RESEARCH BRIEF SCHEMA (Research Agent - Independent Market Research & Strategic Positioning)
+// 2. RESEARCH BRIEF SCHEMA (Research Agent - Panel Composition & Color Psychology)
 export interface TropeReference {
   name: string;
   description: string;
@@ -59,64 +52,60 @@ export interface TropeReference {
   emotionalPayoff: string;
 }
 
-export interface MarketTrend {
-  trendName: string;
-  marketShareGain: string;
-  description: string;
+export interface PanelCompositionRule {
+  panelType: string;
+  recommendedAspect: string;
+  visualImpact: string;
 }
 
 export interface ResearchBrief {
   genreTropesUsed: TropeReference[];
-  genreMarketTrends: MarketTrend[];            // Independent market research trends
-  seriesPositioningAnalysis: string;          // Strategic positioning of this series
-  optimizationRecommendations: string[];     // 3 actionable optimization tips
-  premiseEmotionalDrivers: string[];
-  targetWPM: number;
-  targetEpisodeDurationMinutes: number;
-  targetWordCount: number;
-  hookStrategy: string;
+  panelCompositionRules: PanelCompositionRule[];
+  colorPaletteStrategy: {
+    primaryToneHex: string;
+    secondaryToneHex: string;
+    accentGlowHex: string;
+    paletteRationale: string;
+  };
+  targetPanelsPerPage: number;
+  targetTotalPages: number;
+  visualHookStrategy: string;
 }
 
-// 3. CHARACTER VOICE PROFILE (Screenwriter Sub-Schema)
-export interface CharacterVoiceProfile {
-  characterName: string;
-  apparentAgeRange: string;
-  genderPresentation: string;
-  emotionalRegister: string;
-  vocalToneAdjectives: string[];
-  assignedTTSVoiceId: string;
-}
-
-// 4. EPISODE SCRIPT SCHEMA (Screenwriter Agent - Multi-Episode Script Snippets)
-export interface ScriptLine {
+// 3. COMIC PANEL & SCRIPT SCHEMA (Screenwriter Agent - Panel Breakdowns & Speech Bubbles)
+export interface SpeechBubble {
   id: string;
-  type: 'narrator' | 'dialogue' | 'sfx';
-  character?: string;
-  deliveryDirection?: string;
+  speaker: string;
   text: string;
+  bubbleType: 'dialogue' | 'whisper' | 'shout' | 'caption';
+  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
 }
 
-export interface MultiEpisodeSnippet {
-  episodeNum: number;
-  snippetTitle: string;
+export interface ComicPanelScript {
+  panelNum: number;
   sceneDescription: string;
-  isCoinWall: boolean;
-  lines: ScriptLine[];
+  visualFocusPrompt: string;
+  speechBubbles: SpeechBubble[];
+  visualSoundFX?: string; // e.g. "KRAK!", "BZZZT!", "SHHH!"
+  panelStyle: 'standard' | 'wide-splash' | 'action-split' | 'close-up';
+}
+
+export interface ComicPageScript {
+  pageNum: number;
+  pageTitle: string;
+  isKeyframeSplashPage: boolean;
+  panels: ComicPanelScript[];
 }
 
 export interface EpisodeScript {
-  episodeNum: number;
+  issueNum: number;
   title: string;
-  actualWordCount: number;
-  lines: ScriptLine[];                        // Episode 1 script
-  multiEpisodeSnippets: MultiEpisodeSnippet[]; // Snippets across Ep 1, Ep 3, Ep 5, Finale
-  characterVoiceProfiles: CharacterVoiceProfile[];
-  coinWallCliffhangerPositions: number[];
+  pages: ComicPageScript[];
 }
 
-// 5. AUDIT REPORT SCHEMA (Safety Auditor Agent)
+// 4. AUDIT REPORT SCHEMA (Safety Auditor Agent)
 export interface AuditCheckResult {
-  category: 'PG-13 Content Scan' | 'Copyright & Originality' | 'Cultural & Ethical Safety' | 'Cross-Episode Consistency';
+  category: 'PG-13 Visual Scan' | 'Copyright & Originality' | 'Cultural & Ethical Safety' | 'Cross-Episode Consistency';
   passed: boolean;
   reasoning: string;
   flaggedLines: string[];
@@ -127,17 +116,11 @@ export interface AuditReport {
   overallApproved: boolean;
 }
 
-// 6. LOCALIZATION PACKAGE SCHEMA (Localization Agent - Deep Cultural Adaptation)
-export interface LocalizedCharacterName {
-  originalName: string;
-  localizedName: string;
-  culturalNuance: string;
-}
-
-export interface AdaptedCulturalIdiom {
-  originalPhrase: string;
-  localizedIdiom: string;
-  culturalContext: string;
+// 5. LOCALIZATION PACKAGE SCHEMA (Localization Agent - Speech Bubble & Sound FX Lettering)
+export interface LocalizedSpeechBubble {
+  originalText: string;
+  localizedText: string;
+  speaker: string;
 }
 
 export interface LocalizedLanguageProfile {
@@ -145,9 +128,8 @@ export interface LocalizedLanguageProfile {
   flag: string;
   translatedTitle: string;
   translatedTagline: string;
-  localizedCharacterNames: LocalizedCharacterName[];  // Culturally adapted names
-  adaptedCulturalIdioms: AdaptedCulturalIdiom[];      // Adapted idioms & proverbs
-  culturallyAdaptedScriptText: string;               // Adapted script scene with local phrasing
+  localizedSpeechBubbles: LocalizedSpeechBubble[];
+  localizedSoundFXLettering: Record<string, string>; // e.g. "KRAK!" -> "¡ZAS!", "BZZZT!" -> "धमाका!"
   voiceCastingNotes: {
     characterName: string;
     vocalRange: string;
@@ -160,21 +142,24 @@ export interface LocalizationPackage {
   languages: LocalizedLanguageProfile[];
 }
 
-// 7. PRODUCTION MANIFEST SCHEMA (Production Agent)
-export interface AudioLineSegment {
-  lineId: string;
-  character: string;
-  voiceId: string;
-  deliveryStyle?: string;
-  startTimeOffsetMs: number;
-  durationMs: number;
+// 6. COMIC PRODUCTION MANIFEST SCHEMA (Production Agent - Comic Book Pages & Panels)
+export interface RenderedComicPanel {
+  pageNum: number;
+  panelNum: number;
+  sceneDescription: string;
+  visualFocusPrompt: string;
+  bgGradient: string;
+  avatarIcon: string;
+  speechBubbles: SpeechBubble[];
+  visualSoundFX?: string;
+  panelStyle: string;
 }
 
-export interface AppliedSFXClip {
-  sfxCueId: string;
-  description: string;
-  matchedFile: string;
-  timestampMs: number;
+export interface RenderedComicPage {
+  pageNum: number;
+  pageTitle: string;
+  isKeyframeSplashPage: boolean;
+  panels: RenderedComicPanel[];
 }
 
 export interface LockedEpisode {
@@ -187,11 +172,9 @@ export interface LockedEpisode {
 }
 
 export interface ProductionManifest {
-  episodeNum: number;
-  audioFilePath: string;
-  totalDurationSeconds: number;
-  voiceMapping: Record<string, string>;
-  lineSegments: AudioLineSegment[];
-  appliedSFX: AppliedSFXClip[];
-  missingSFXLogged: string[];
+  issueNum: number;
+  title: string;
+  totalPages: number;
+  visualStyle: string;
+  pages: RenderedComicPage[];
 }

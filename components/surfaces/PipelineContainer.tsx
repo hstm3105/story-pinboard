@@ -22,7 +22,7 @@ import { TeleprompterView } from './TeleprompterView';
 import { SafetyChecklist } from './SafetyChecklist';
 import { LocalizationGrid } from './LocalizationGrid';
 import { ResearchDetailPanel } from './ResearchDetailPanel';
-import { ProductionDetailPanel } from './ProductionDetailPanel';
+import { ComicBookReader } from './ComicBookReader';
 import { TapeDeck } from './TapeDeck';
 import { SettingsModal } from './SettingsModal';
 import { TelemetryTicker } from './TelemetryTicker';
@@ -36,9 +36,9 @@ import {
   runLocalizationAgent,
 } from '@/lib/geminiApi';
 
-import { runProductionVoiceAgent } from '@/lib/productionAgent';
+import { runComicProductionAgent } from '@/lib/comicProductionAgent';
 
-import { Radio, Settings, Key, AlertCircle, Send } from 'lucide-react';
+import { Radio, Settings, Key, AlertCircle, Send, Palette } from 'lucide-react';
 
 export const PipelineContainer: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState<string>('Sci-Fi');
@@ -81,12 +81,12 @@ export const PipelineContainer: React.FC = () => {
   };
 
   const [stages, setStages] = useState<AgentStage[]>([
-    { id: 'director', name: 'Director Agent', role: 'StoryBible & Turning Points', status: 'queued' },
-    { id: 'research', name: 'Research Agent', role: 'Tropes, WPM & Word Count', status: 'queued' },
-    { id: 'screenwriter', name: 'Screenwriter Agent', role: 'Formatted Script & Voice Profiles', status: 'queued' },
-    { id: 'auditor', name: 'Safety Auditor Agent', role: '4 Compliance Scans & Gating', status: 'queued' },
-    { id: 'localization', name: 'Localization Agent', role: '2+ Languages & Casting Notes', status: 'queued' },
-    { id: 'production', name: 'Production Agent', role: 'Voice Synthesis & MP3 Master', status: 'queued' },
+    { id: 'director', name: 'Director Agent', role: 'Visual Aesthetic & Keyframes', status: 'queued' },
+    { id: 'research', name: 'Research Agent', role: 'Panel Grid & Color Palette', status: 'queued' },
+    { id: 'screenwriter', name: 'Screenwriter Agent', role: 'Page & Panel Breakdowns', status: 'queued' },
+    { id: 'auditor', name: 'Safety Auditor Agent', role: 'PG-13 Scan & Originality', status: 'queued' },
+    { id: 'localization', name: 'Localization Agent', role: 'Bubbles & Sound FX Translation', status: 'queued' },
+    { id: 'production', name: 'Comic Production Agent', role: 'Comic Illustrator & Reader Master', status: 'queued' },
   ]);
 
   const [telemetryEvents, setTelemetryEvents] = useState<TelemetryEvent[]>([]);
@@ -102,7 +102,7 @@ export const PipelineContainer: React.FC = () => {
     setCustomPremise(samplePremise);
   };
 
-  // 100% REAL DEEP MULTI-AGENT PIPELINE EXECUTION
+  // 100% REAL DEEP MULTI-AGENT COMIC PIPELINE EXECUTION
   const handleRunPipeline = async () => {
     if (!settings.apiKey || !settings.apiKey.trim()) {
       setIsSettingsOpen(true);
@@ -142,7 +142,7 @@ export const PipelineContainer: React.FC = () => {
 
     try {
       // 1. DIRECTOR AGENT
-      logTelemetry('director', 'Director Agent', `Director Agent: Calling Gemini API (${settings.model}) for "${selectedGenre}" StoryBible...`);
+      logTelemetry('director', 'Director Agent', `Director Agent: Calling Gemini API (${settings.model}) for "${selectedGenre}" Visual Bible...`);
       const { storyBible: bible, logMessage: directorLog } = await runDirectorAgent(settings.apiKey, settings.model, selectedGenre, customPremise);
       setStoryBible(bible);
       updateStageStatus('director', 'complete');
@@ -151,7 +151,7 @@ export const PipelineContainer: React.FC = () => {
 
       // 2. RESEARCH AGENT
       updateStageStatus('research', 'in_progress');
-      logTelemetry('research', 'Research Agent', `Research Agent: Conducting independent market research & retention analysis...`);
+      logTelemetry('research', 'Research Agent', `Research Agent: Analyzing panel composition rules & color palette strategy...`);
       const { researchBrief, logMessage: researchLog } = await runResearchAgent(settings.apiKey, settings.model, selectedGenre, bible);
       setResearchData(researchBrief);
       updateStageStatus('research', 'complete');
@@ -159,7 +159,7 @@ export const PipelineContainer: React.FC = () => {
 
       // 3. SCREENWRITER AGENT
       updateStageStatus('screenwriter', 'in_progress');
-      logTelemetry('screenwriter', 'Screenwriter Agent', `Screenwriter Agent: Drafting multi-episode script snippets & character voice profiles...`);
+      logTelemetry('screenwriter', 'Screenwriter Agent', `Screenwriter Agent: Drafting comic page & panel breakdowns with speech bubbles & visual SFX...`);
       const { episodeScript: script, lockedEpisodes: locked, logMessage: scriptLog } = await runScreenwriterAgent(settings.apiKey, settings.model, bible, researchBrief);
       setEpisodeScript(script);
       setLockedEpisodes(locked);
@@ -168,33 +168,33 @@ export const PipelineContainer: React.FC = () => {
 
       // 4. SAFETY AUDITOR AGENT
       updateStageStatus('auditor', 'in_progress');
-      logTelemetry('auditor', 'Safety Auditor Agent', `Safety Auditor Agent: Running 4 compliance scans against Episode 1 script...`);
+      logTelemetry('auditor', 'Safety Auditor Agent', `Safety Auditor Agent: Running 4 visual compliance scans against comic panels...`);
       const { auditReport: audit, logMessage: auditLog } = await runSafetyAuditorAgent(settings.apiKey, settings.model, bible, script);
       setAuditReport(audit);
       updateStageStatus('auditor', 'complete');
       logTelemetry('auditor', 'Safety Auditor Agent', auditLog);
 
       if (!audit.overallApproved) {
-        logTelemetry('auditor', 'Safety Alert', `Safety Auditor flagged compliance concerns. Halting automatic voice production until approved.`);
+        logTelemetry('auditor', 'Safety Alert', `Safety Auditor flagged compliance concerns. Halting automatic comic production until approved.`);
         setActiveDetailStageId('auditor');
         return;
       }
 
       // 5. LOCALIZATION AGENT
       updateStageStatus('localization', 'in_progress');
-      logTelemetry('localization', 'Localization Agent', `Localization Agent: Performing deep cultural adaptation for Spanish & Hindi...`);
+      logTelemetry('localization', 'Localization Agent', `Localization Agent: Translating speech bubbles & sound FX lettering for Spanish & Hindi...`);
       const { localizationPackage: locPkg, logMessage: locLog } = await runLocalizationAgent(settings.apiKey, settings.model, bible, script);
       setLocalizationPackage(locPkg);
       updateStageStatus('localization', 'complete');
       logTelemetry('localization', 'Localization Agent', locLog);
 
-      // 6. PRODUCTION / VOICE AGENT
+      // 6. COMIC PRODUCTION AGENT
       updateStageStatus('production', 'in_progress');
-      logTelemetry('production', 'Production Agent', `Production Agent: Synthesizing multi-speaker speech audio & mixing soundscapes...`);
-      const { manifest: prodManifest, logMessage: prodLog } = await runProductionVoiceAgent(script);
+      logTelemetry('production', 'Comic Production Agent', `Comic Production Agent: Rendering comic panel artwork, speech bubbles & visual SFX callouts...`);
+      const { manifest: prodManifest, logMessage: prodLog } = await runComicProductionAgent(script, bible.visualAestheticStyle || 'Dark Noir Cyberpunk');
       setProductionManifest(prodManifest);
       updateStageStatus('production', 'complete');
-      logTelemetry('production', 'Production Agent', prodLog);
+      logTelemetry('production', 'Comic Production Agent', prodLog);
 
       setActiveDetailStageId('production');
     } catch (err: any) {
@@ -230,14 +230,14 @@ export const PipelineContainer: React.FC = () => {
       <header className="bg-charcoal border-b border-slate-border px-6 py-4 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-crimson flex items-center justify-center text-white shadow-lg">
-            <Radio className="w-6 h-6" />
+            <Palette className="w-6 h-6" />
           </div>
           <div>
             <h1 className="font-display font-black text-xl uppercase tracking-wider text-white">
-              ANTIGRAVITY STUDIO SUITE
+              ANTIGRAVITY COMIC STUDIO
             </h1>
             <span className="font-mono text-[10px] text-cyan uppercase tracking-widest block">
-              SPLIT-SCREEN MULTI-AGENT AUDIO PRODUCTION PLATFORM
+              AGENTIC GRAPHIC NOVEL & COMIC BOOK PRODUCTION SUITE
             </span>
           </div>
         </div>
@@ -283,19 +283,19 @@ export const PipelineContainer: React.FC = () => {
         currentSettings={settings}
       />
 
-      {/* Main Studio Viewport - CLEAN SPLIT-SCREEN LAYOUT (Desktop >= MD) */}
+      {/* Main Studio Viewport - SPLIT-SCREEN LAYOUT (Desktop >= MD) */}
       <main className="hidden md:flex flex-1 w-full max-w-[1600px] mx-auto p-6 gap-6">
         
-        {/* LEFT COLUMN PANEL: PROMPT STUDIO & SINGLE TELEMETRY LOG (~38% Width) */}
+        {/* LEFT COLUMN PANEL: PROMPT STUDIO & TELEMETRY LOG (~38% Width) */}
         <aside className="w-[38%] space-y-6 flex flex-col justify-between">
           <div className="space-y-5 bg-slate border border-slate-border rounded-xl p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-                  STUDIO INPUT // PROMPT CONTROL
+                  STUDIO INPUT // COMIC PROMPT CONTROL
                 </span>
                 <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-white">
-                  Series Premise Studio
+                  Comic Series Studio
                 </h2>
               </div>
               <span className="font-mono text-xs bg-crimson/15 text-crimson border border-crimson/30 px-3 py-1 rounded font-bold">
@@ -306,12 +306,12 @@ export const PipelineContainer: React.FC = () => {
             {/* Custom Premise Textarea Input */}
             <div className="space-y-2">
               <label className="font-mono text-xs text-surface-muted block font-semibold">
-                ENTER CUSTOM STORY PREMISE PROMPT:
+                ENTER CUSTOM COMIC STORY PREMISE:
               </label>
               <textarea
                 value={customPremise}
                 onChange={(e) => setCustomPremise(e.target.value)}
-                placeholder="Describe your story premise, protagonist dilemma, world rules, or series concept..."
+                placeholder="Describe your comic premise, protagonist dilemma, visual style, or graphic novel concept..."
                 className="w-full h-44 bg-charcoal border border-slate-border rounded-lg p-3 font-sans text-sm text-white placeholder-surface-muted focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson resize-none leading-relaxed"
               />
             </div>
@@ -325,18 +325,18 @@ export const PipelineContainer: React.FC = () => {
               {isExpanding ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Agents Executing...</span>
+                  <span>Illustrating Issue #1...</span>
                 </>
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>⚡ Run Multi-Agent Studio Pipeline</span>
+                  <span>⚡ Produce Comic Book Issue #1</span>
                 </>
               )}
             </button>
           </div>
 
-          {/* SINGLE DEDICATED LIVE TELEMETRY LOG TRACE PANEL ON LEFT COLUMN */}
+          {/* TELEMETRY LOG TRACE PANEL ON LEFT COLUMN */}
           <div className="flex-1 bg-slate border border-slate-border rounded-xl p-4 shadow-2xl flex flex-col justify-between">
             <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-2 font-bold">
               AGENT TELEMETRY TRACE LOG
@@ -347,15 +347,15 @@ export const PipelineContainer: React.FC = () => {
           </div>
         </aside>
 
-        {/* RIGHT COLUMN PANEL: SINGLE CATEGORIES GRID & PRODUCTION DECK (~62% Width) */}
+        {/* RIGHT COLUMN PANEL: CATEGORIES GRID & PRODUCTION DECK (~62% Width) */}
         <section className="w-[62%] space-y-6 overflow-y-auto pr-1">
-          {/* Surface 1: SINGLE Category Selection Grid */}
+          {/* Surface 1: Category Selection Grid */}
           <DirectorDeck
             onSelectCategory={handleCategorySelect}
             selectedCategory={selectedGenre}
           />
 
-          {/* Surface 2: Studio Master Deck (6 Agents - Telemetry Ticker removed from inside) */}
+          {/* Surface 2: Studio Master Deck (6 Agents) */}
           <MasterDeck
             stages={stages}
             activeDetailStageId={activeDetailStageId}
@@ -374,7 +374,7 @@ export const PipelineContainer: React.FC = () => {
             />
           )}
 
-          {/* Surface 3: Radio Teleprompter View */}
+          {/* Surface 3: Screenwriter Panel & Script View */}
           {activeDetailStageId === 'screenwriter' && episodeScript && (
             <TeleprompterView
               script={episodeScript}
@@ -401,16 +401,15 @@ export const PipelineContainer: React.FC = () => {
             />
           )}
 
-          {/* Production / Voice Agent Audio Detail Panel */}
+          {/* NEW: Comic Production Agent & Graphic Novel Reader Master */}
           {activeDetailStageId === 'production' && productionManifest && (
-            <ProductionDetailPanel
+            <ComicBookReader
               manifest={productionManifest}
-              scriptLines={episodeScript?.lines || []}
               onApprove={handleApproveStage}
             />
           )}
 
-          {/* Surface 4: Reel-to-Reel Tape Deck */}
+          {/* Surface 4: Tape Deck / Episode Outlines */}
           {lockedEpisodes.length > 0 && <TapeDeck episodes={lockedEpisodes} />}
         </section>
       </main>
@@ -427,7 +426,7 @@ export const PipelineContainer: React.FC = () => {
 
       {/* Persistent Studio Footer */}
       <footer className="bg-charcoal-dark border-t border-slate-border px-6 py-3 text-center font-mono text-xs text-surface-subtle z-50">
-        ANTIGRAVITY MULTI-AGENT STUDIO PIPELINE // POWERED BY GOOGLE GEMINI API
+        ANTIGRAVITY MULTI-AGENT COMIC STUDIO // POWERED BY GOOGLE GEMINI API
       </footer>
     </div>
   );

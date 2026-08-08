@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { StoryBible } from '@/lib/types';
-import { Clapperboard } from 'lucide-react';
+import { Palette, Sparkles, UserCheck } from 'lucide-react';
 
 interface TitleCardProps {
   concept: StoryBible;
@@ -20,13 +20,13 @@ export const TitleCard: React.FC<TitleCardProps> = ({ concept }) => {
       {/* Top Header Metadata */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Clapperboard className="w-5 h-5 text-crimson" />
+          <Palette className="w-5 h-5 text-crimson" />
           <span className="font-mono text-xs text-cyan uppercase tracking-widest font-bold">
-            DIRECTOR REVEAL // {concept.genreBlend}
+            DIRECTOR COMIC REVEAL // {concept.visualAestheticStyle || 'Dark Noir Cyberpunk'}
           </span>
         </div>
         <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold">
-          STORY BIBLE APPROVED
+          GRAPHIC BIBLE APPROVED
         </span>
       </div>
 
@@ -72,25 +72,33 @@ export const TitleCard: React.FC<TitleCardProps> = ({ concept }) => {
         </div>
       </motion.div>
 
-      {/* 3-Act Structural Breakdown */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-slate-border text-xs font-mono text-surface-muted"
-      >
-        {concept.actBreakdown.map((act) => (
-          <div key={act.actNumber} className="bg-charcoal/60 p-3.5 rounded-lg border border-slate-border/50 space-y-1">
-            <div className="flex items-center justify-between text-gold font-bold">
-              <span>ACT {act.actNumber}: {act.title}</span>
-            </div>
-            <p className="text-surface-text text-[11px] font-sans">{act.synopsis}</p>
-            <div className="text-[10px] text-cyan pt-1">
-              <strong>Turning Point:</strong> {act.turningPoint}
-            </div>
+      {/* CHARACTER VISUAL KEYFRAMES */}
+      {concept.characterVisualKeyframes && concept.characterVisualKeyframes.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="space-y-2 pt-3 border-t border-slate-border"
+        >
+          <span className="font-mono text-xs text-gold uppercase flex items-center gap-1.5 font-bold">
+            <UserCheck className="w-4 h-4 text-gold" /> CHARACTER VISUAL KEYFRAME DESIGN BIBLE
+          </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-surface-muted">
+            {concept.characterVisualKeyframes.map((char) => (
+              <div key={char.characterName} className="bg-charcoal/80 p-3.5 rounded-lg border border-slate-border/60 space-y-1">
+                <div className="flex items-center justify-between text-crimson font-bold">
+                  <span>{char.characterName}</span>
+                  <span className="text-cyan text-[10px]">{char.colorTheme}</span>
+                </div>
+                <p className="text-white text-[11px] font-sans">{char.visualAppearance}</p>
+                <div className="text-[10px] text-gold italic pt-0.5">
+                  <strong>Signature Costume:</strong> {char.signatureCostume}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </motion.div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };

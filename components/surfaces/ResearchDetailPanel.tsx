@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ResearchBrief } from '@/lib/types';
-import { CheckCircle2, RefreshCw, Zap, Target, TrendingUp, Compass, Lightbulb } from 'lucide-react';
+import { CheckCircle2, RefreshCw, Layout, Palette, Compass, Layers } from 'lucide-react';
 
 interface ResearchDetailPanelProps {
   research: ResearchBrief;
@@ -24,7 +24,7 @@ export const ResearchDetailPanel: React.FC<ResearchDetailPanelProps> = ({
             SURFACE 02.B // RESEARCH AGENT DETAIL VIEW
           </span>
           <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
-            Independent Market Intelligence & Retention Strategy
+            Comic Visual Composition & Color Palette Brief
           </h2>
         </div>
         <div className="flex items-center gap-3">
@@ -43,78 +43,76 @@ export const ResearchDetailPanel: React.FC<ResearchDetailPanelProps> = ({
         </div>
       </div>
 
-      {/* Target Audio Pacing & Word Count Metrics */}
+      {/* Target Panel Layout & Page Count Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-charcoal p-4 rounded-xl border border-slate-border space-y-1">
-          <span className="font-mono text-[10px] text-cyan uppercase font-bold">TARGET WPM</span>
+          <span className="font-mono text-[10px] text-cyan uppercase font-bold">PANELS PER PAGE</span>
           <div className="font-mono text-xl text-white font-bold flex items-center gap-2">
-            <Zap className="w-5 h-5 text-cyan" /> {research.targetWPM} WPM
+            <Layout className="w-5 h-5 text-cyan" /> {research.targetPanelsPerPage || 4} Panels
           </div>
         </div>
 
         <div className="bg-charcoal p-4 rounded-xl border border-slate-border space-y-1">
-          <span className="font-mono text-[10px] text-gold uppercase font-bold">EPISODE DURATION</span>
+          <span className="font-mono text-[10px] text-gold uppercase font-bold">ISSUE TOTAL PAGES</span>
           <div className="font-mono text-xl text-white font-bold flex items-center gap-2">
-            <Target className="w-5 h-5 text-gold" /> {research.targetEpisodeDurationMinutes} Minutes
+            <Layers className="w-5 h-5 text-gold" /> {research.targetTotalPages || 4} Illustrated Pages
           </div>
         </div>
 
         <div className="bg-charcoal p-4 rounded-xl border border-slate-border space-y-1">
-          <span className="font-mono text-[10px] text-crimson uppercase font-bold">TARGET WORD COUNT</span>
-          <div className="font-mono text-xl text-white font-bold flex items-center gap-2">
-            {research.targetWordCount} Words
+          <span className="font-mono text-[10px] text-crimson uppercase font-bold">PRIMARY COLOR PALETTE</span>
+          <div className="font-mono text-xs text-white font-bold flex items-center gap-2 pt-1">
+            <span className="w-4 h-4 rounded-full border" style={{ backgroundColor: research.colorPaletteStrategy?.secondaryToneHex || '#D32F2F' }} />
+            <span>{research.colorPaletteStrategy?.accentGlowHex || '#5FA8B0'}</span>
           </div>
         </div>
       </div>
 
-      {/* INDEPENDENT MARKET TRENDS */}
-      {research.genreMarketTrends && research.genreMarketTrends.length > 0 && (
+      {/* PANEL COMPOSITION RULES */}
+      {research.panelCompositionRules && research.panelCompositionRules.length > 0 && (
         <div className="space-y-3">
           <span className="font-mono text-xs text-gold uppercase flex items-center gap-2 font-semibold">
-            <TrendingUp className="w-4 h-4 text-gold" /> INDEPENDENT GENRE MARKET TRENDS & PERFORMANCE
+            <Compass className="w-4 h-4 text-gold" /> PANEL GRID COMPOSITION RULES
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {research.genreMarketTrends.map((t, idx) => (
+            {research.panelCompositionRules.map((rule, idx) => (
               <div key={idx} className="bg-charcoal p-4 rounded-xl border border-slate-border space-y-1">
                 <div className="flex items-center justify-between">
-                  <strong className="font-display text-base text-white uppercase">{t.trendName}</strong>
-                  <span className="font-mono text-xs bg-gold/15 text-gold px-2.5 py-0.5 rounded border border-gold/30 font-bold">
-                    {t.marketShareGain}
+                  <strong className="font-display text-base text-white uppercase">{rule.panelType}</strong>
+                  <span className="font-mono text-xs bg-cyan/15 text-cyan px-2.5 py-0.5 rounded border border-cyan/30 font-bold">
+                    {rule.recommendedAspect}
                   </span>
                 </div>
-                <p className="font-sans text-xs text-surface-muted pt-1">{t.description}</p>
+                <p className="font-sans text-xs text-surface-muted pt-1">{rule.visualImpact}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* STRATEGIC POSITIONING ANALYSIS */}
-      {research.seriesPositioningAnalysis && (
-        <div className="bg-charcoal p-5 rounded-xl border border-slate-border space-y-2">
+      {/* COLOR PALETTE STRATEGY */}
+      {research.colorPaletteStrategy && (
+        <div className="bg-charcoal p-5 rounded-xl border border-slate-border space-y-3">
           <span className="font-mono text-xs text-cyan uppercase flex items-center gap-2 font-semibold">
-            <Compass className="w-4 h-4 text-cyan" /> SERIES COMPETITIVE POSITIONING ANALYSIS
+            <Palette className="w-4 h-4 text-cyan" /> ATMOSPHERIC COLOR PALETTE STRATEGY
           </span>
-          <p className="font-sans text-sm text-surface-text leading-relaxed">
-            {research.seriesPositioningAnalysis}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 font-mono text-xs">
+              <span className="w-5 h-5 rounded border" style={{ backgroundColor: research.colorPaletteStrategy.primaryToneHex }} />
+              <span className="text-surface-muted">Base: {research.colorPaletteStrategy.primaryToneHex}</span>
+            </div>
+            <div className="flex items-center gap-2 font-mono text-xs">
+              <span className="w-5 h-5 rounded border" style={{ backgroundColor: research.colorPaletteStrategy.secondaryToneHex }} />
+              <span className="text-crimson font-bold">Primary: {research.colorPaletteStrategy.secondaryToneHex}</span>
+            </div>
+            <div className="flex items-center gap-2 font-mono text-xs">
+              <span className="w-5 h-5 rounded border" style={{ backgroundColor: research.colorPaletteStrategy.accentGlowHex }} />
+              <span className="text-cyan font-bold">Glow: {research.colorPaletteStrategy.accentGlowHex}</span>
+            </div>
+          </div>
+          <p className="font-sans text-xs text-surface-text italic leading-relaxed">
+            {research.colorPaletteStrategy.paletteRationale}
           </p>
-        </div>
-      )}
-
-      {/* ACTIONABLE OPTIMIZATION RECOMMENDATIONS */}
-      {research.optimizationRecommendations && research.optimizationRecommendations.length > 0 && (
-        <div className="bg-charcoal p-5 rounded-xl border border-slate-border space-y-2">
-          <span className="font-mono text-xs text-crimson uppercase flex items-center gap-2 font-semibold">
-            <Lightbulb className="w-4 h-4 text-crimson" /> RETENTION & MONETIZATION OPTIMIZATION RECOMMENDATIONS
-          </span>
-          <ul className="space-y-2 font-sans text-xs text-surface-text">
-            {research.optimizationRecommendations.map((rec, idx) => (
-              <li key={idx} className="flex items-start gap-2 bg-slate p-2.5 rounded border border-slate-border/50">
-                <span className="font-mono font-bold text-crimson">{idx + 1}.</span>
-                <span>{rec}</span>
-              </li>
-            ))}
-          </ul>
         </div>
       )}
 
