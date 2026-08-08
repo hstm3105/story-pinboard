@@ -5,6 +5,11 @@ import {
   RenderedComicPanel,
 } from './types';
 
+import {
+  generatePanelArtwork,
+  mapPanelStyleToFraming,
+} from './generatePanelArtwork';
+
 const PANEL_BG_GRADIENTS = [
   'from-slate-900 via-purple-950 to-slate-900',
   'from-slate-900 via-cyan-950 to-charcoal',
@@ -15,53 +20,73 @@ const PANEL_BG_GRADIENTS = [
 
 export async function runComicProductionAgent(
   script: EpisodeScript,
-  visualStyle: string
+  visualStyle: string,
+  apiKey?: string
 ): Promise<{ manifest: ProductionManifest; logMessage: string }> {
   const pages: RenderedComicPage[] = [];
 
-  for (const page of script.pages) {
-    // 100% DYNAMIC LIVE FULL-PAGE COMIC ARTWORK GENERATION BASED ON PREVIOUS AGENT OUTPUTS
-    const pagePrompt = `${script.title} - ${page.pageTitle}. Scene panels: ${page.panels.map((p) => p.sceneDescription).join('; ')}`;
-    const seed = Math.floor(Math.random() * 1000000);
-    const fullPagePrompt = encodeURIComponent(`Full page comic book page layout with 3 panels and dark gutter lines, ${pagePrompt}, ${visualStyle || 'Dark Noir Cyberpunk'} graphic novel comic book page art`);
-    
-    // Live dynamic AI image generation URL constructed directly from previous agents' story script
-    let pageImageUrl = `https://image.pollinations.ai/prompt/${fullPagePrompt}?width=900&height=1200&seed=${seed}&nologo=true`;
+  // CHARACTER DESIGN SHEETS: Built once per named character and reused VERBATIM across all panels
+  const characterDesignSheets: Record<string, string> = {};
 
-    try {
-      // DYNAMIC LIVE FULL-PAGE IMAGE API ROUTE CALL
-      const response = await fetch('/api/generate-comic-panel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: pagePrompt,
-          visualStyle: visualStyle || 'Dark Noir Cyberpunk',
-          pageNum: page.pageNum,
-          type: 'full-page',
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.imageUrl) {
-          pageImageUrl = data.imageUrl;
+  // Build character design sheets for primary speakers
+  script.pages.forEach((page) => {
+    page.panels.forEach((panel) => {
+      panel.speechBubbles.forEach((sb) => {
+        const speaker = sb.speaker.toUpperCase().trim();
+        if (speaker && speaker !== 'NARRATOR' && !characterDesignSheets[speaker]) {
+          let desc = `${speaker}: Superhero protagonist with athletic build, distinctive tactical outfit, expressive eyes, and heroic posture.`;
+          if (speaker.includes('KAI')) {
+            desc = `KAI: Male cyberpunk technician, athletic build, short dark messy hair with cyan cybernetic eye overlay, dark grey tactical jacket over black armor, glowing cyan neural wrist gauge.`;
+          } else if (speaker.includes('LYRA')) {
+            desc = `LYRA: Female signal strategist, silver-braided hair, dark indigo leather vest, gold brass comms ear piece, high-contrast tactical gear.`;
+          } else if (speaker.includes('ARCHER')) {
+            desc = `ARCHER: Cybernetic commander, heavy obsidian power armor, glowing red visor, tactical shoulders.`;
+          }
+          characterDesignSheets[speaker] = desc;
         }
-      }
-    } catch (err) {
-      console.warn(`Dynamic live full-page comic image API generation note for Page ${page.pageNum}:`, err);
-    }
+      });
+    });
+  });
 
-    const renderedPanels: RenderedComicPanel[] = page.panels.map((panel, idx) => {
+  // Default character design sheet if none found
+  const defaultCharSheet = "KAI: Male superhero protagonist in tactical armor with cybernetic details.";
+
+  for (const page of script.pages) {
+    const renderedPanels: RenderedComicPanel[] = [];
+
+    for (let idx = 0; idx < page.panels.length; idx++) {
+      const panel = page.panels[idx];
       const gradient = PANEL_BG_GRADIENTS[idx % PANEL_BG_GRADIENTS.length];
-      const speaker = panel.speechBubbles[0]?.speaker || 'NARRATOR';
+      const speaker = panel.speechBubbles[0]?.speaker?.toUpperCase()?.trim() || 'NARRATOR';
 
       let avatarIcon = '👤';
-      if (speaker.toUpperCase().includes('KAI')) avatarIcon = '⚡';
-      else if (speaker.toUpperCase().includes('LYRA')) avatarIcon = '🔮';
-      else if (speaker.toUpperCase().includes('ARCHER')) avatarIcon = '🤖';
-      else if (speaker.toUpperCase().includes('NARRATOR')) avatarIcon = '📖';
+      if (speaker.includes('KAI')) avatarIcon = '⚡';
+      else if (speaker.includes('LYRA')) avatarIcon = '🔮';
+      else if (speaker.includes('ARCHER')) avatarIcon = '🤖';
+      else if (speaker.includes('NARRATOR')) avatarIcon = '📖';
 
-      return {
+      // Reused verbatim character design sheet
+      const charSheet = characterDesignSheets[speaker] || defaultCharSheet;
+
+      // Derived framing from panel.panelStyle
+      const framing = mapPanelStyleToFraming(panel.panelStyle);
+
+      // Derived action from panel.sceneDescription & panel.visualFocusPrompt
+      const action = `${panel.sceneDescription}. ${panel.visualFocusPrompt}`;
+
+      const panelSeed = page.pageNum * 100 + panel.panelNum;
+
+      // GENERATE ARTWORK PER PANEL USING SHARED ENGINE
+      const result = await generatePanelArtwork({
+        apiKey,
+        characterDesignSheet: charSheet,
+        sceneFraming: framing,
+        characterAction: action,
+        visualStyle,
+        seed: panelSeed,
+      });
+
+      renderedPanels.push({
         pageNum: page.pageNum,
         panelNum: panel.panelNum,
         sceneDescription: panel.sceneDescription,
@@ -71,8 +96,12 @@ export async function runComicProductionAgent(
         speechBubbles: panel.speechBubbles,
         visualSoundFX: panel.visualSoundFX,
         panelStyle: panel.panelStyle,
-      };
-    });
+        imageUrl: result.imageUrl, // POPULATE PER-PANEL IMAGE URL
+      });
+    }
+
+    // Optional page-level fallback
+    const pageImageUrl = renderedPanels[0]?.imageUrl;
 
     pages.push({
       pageNum: page.pageNum,
@@ -91,7 +120,8 @@ export async function runComicProductionAgent(
     pages,
   };
 
-  const logMessage = `Comic Production Agent: ✅ Live AI full-page comic image generation complete! ${pages.length} complete multi-panel comic book page artwork images dynamically generated from story script in "${visualStyle}" style!`;
+  const totalPanels = pages.reduce((acc, p) => acc + p.panels.length, 0);
+  const logMessage = `Comic Production Agent: ✅ Per-panel artwork generation complete! ${totalPanels} panels rendered with verbatim character design sheets in "${visualStyle}" style!`;
 
   return { manifest, logMessage };
 }
