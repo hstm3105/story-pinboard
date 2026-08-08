@@ -38,9 +38,11 @@ import {
 
 import { runComicProductionAgent } from '@/lib/comicProductionAgent';
 
-import { Radio, Settings, Key, AlertCircle, Send, Palette } from 'lucide-react';
+import { SinglePanelTest } from './SinglePanelTest';
+import { Radio, Settings, Key, AlertCircle, Send, Palette, Layers, Sparkles } from 'lucide-react';
 
 export const PipelineContainer: React.FC = () => {
+  const [activeViewMode, setActiveViewMode] = useState<'benchmark' | 'pipeline'>('benchmark');
   const [selectedGenre, setSelectedGenre] = useState<string>('Sci-Fi');
   const [customPremise, setCustomPremise] = useState<string>(
     'In the flooded lower sectors of New Babel, a rogue technician extracts an illegal memory drive, discovering proof that the city ruler was once a human resident of the slums.'
@@ -283,7 +285,42 @@ export const PipelineContainer: React.FC = () => {
         currentSettings={settings}
       />
 
-      {/* Main Studio Viewport - SPLIT-SCREEN LAYOUT (Desktop >= MD) */}
+      {/* MODE SELECTOR HEADER BAR */}
+      <div className="bg-charcoal border-b border-slate-border px-6 py-3 flex items-center justify-between text-xs font-mono">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setActiveViewMode('benchmark')}
+            className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${
+              activeViewMode === 'benchmark'
+                ? 'bg-gold text-slate-950 shadow-lg'
+                : 'bg-slate text-surface-muted hover:text-white border border-slate-border'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" /> ⚡ 1. Single-Panel Imagen-3 Benchmark Test
+          </button>
+          <button
+            onClick={() => setActiveViewMode('pipeline')}
+            className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all ${
+              activeViewMode === 'pipeline'
+                ? 'bg-crimson text-white shadow-lg'
+                : 'bg-slate text-surface-muted hover:text-white border border-slate-border'
+            }`}
+          >
+            <Layers className="w-4 h-4" /> 📖 2. Full Multi-Agent Graphic Novel Pipeline
+          </button>
+        </div>
+        <span className="text-cyan font-semibold hidden sm:inline">
+          {activeViewMode === 'benchmark' ? 'Single Panel Quality & Vector Lettering Stage' : 'Production Pipeline Active'}
+        </span>
+      </div>
+
+      {activeViewMode === 'benchmark' ? (
+        <div className="w-full max-w-[1600px] mx-auto p-6">
+          <SinglePanelTest />
+        </div>
+      ) : (
+        <>
+          {/* Main Studio Viewport - SPLIT-SCREEN LAYOUT (Desktop >= MD) */}
       <main className="hidden md:flex flex-1 w-full max-w-[1600px] mx-auto p-6 gap-6">
         
         {/* LEFT COLUMN PANEL: PROMPT STUDIO & TELEMETRY LOG (~38% Width) */}
@@ -423,6 +460,8 @@ export const PipelineContainer: React.FC = () => {
           onOpenDetail={handleOpenDetail}
         />
       </div>
+        </>
+      )}
 
       {/* Persistent Studio Footer */}
       <footer className="bg-charcoal-dark border-t border-slate-border px-6 py-3 text-center font-mono text-xs text-surface-subtle z-50">
