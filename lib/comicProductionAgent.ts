@@ -5,11 +5,6 @@ import {
   RenderedComicPanel,
 } from './types';
 
-import {
-  generatePanelArtwork,
-  mapPanelStyleToFraming,
-} from './generatePanelArtwork';
-
 const PANEL_BG_GRADIENTS = [
   'from-slate-900 via-purple-950 to-slate-900',
   'from-slate-900 via-cyan-950 to-charcoal',
@@ -23,39 +18,8 @@ export async function runComicProductionAgent(
   visualStyle: string,
   apiKey?: string
 ): Promise<{ manifest: ProductionManifest; logMessage: string }> {
-  const pages: RenderedComicPage[] = [];
-
-  // CHARACTER DESIGN SHEETS: Built once per named character and reused VERBATIM across all panels
-  const characterDesignSheets: Record<string, string> = {};
-
-  script.pages.forEach((page) => {
-    page.panels.forEach((panel) => {
-      panel.speechBubbles.forEach((sb) => {
-        const speaker = sb.speaker.toUpperCase().trim();
-        if (speaker && speaker !== 'NARRATOR' && !characterDesignSheets[speaker]) {
-          let desc = `${speaker}: Superhero protagonist with athletic build, distinctive tactical outfit, expressive eyes, and heroic posture.`;
-          if (speaker.includes('KAI')) {
-            desc = `KAI: Male cyberpunk technician, athletic build, short dark messy hair with cyan cybernetic eye overlay, dark grey tactical jacket over black armor, glowing cyan neural wrist gauge.`;
-          } else if (speaker.includes('LYRA')) {
-            desc = `LYRA: Female signal strategist, silver-braided hair, dark indigo leather vest, gold brass comms ear piece, high-contrast tactical gear.`;
-          } else if (speaker.includes('ARCHER')) {
-            desc = `ARCHER: Cybernetic commander, heavy obsidian power armor, glowing red visor, tactical shoulders.`;
-          }
-          characterDesignSheets[speaker] = desc;
-        }
-      });
-    });
-  });
-
-  const defaultCharSheet = "KAI: Male superhero protagonist in tactical armor with cybernetic details.";
-  let totalArtGenerated = 0;
-  let totalTextFallback = 0;
-
-  for (const page of script.pages) {
-    const renderedPanels: RenderedComicPanel[] = [];
-
-    for (let idx = 0; idx < page.panels.length; idx++) {
-      const panel = page.panels[idx];
+  const pages: RenderedComicPage[] = script.pages.map((page) => {
+    const renderedPanels: RenderedComicPanel[] = page.panels.map((panel, idx) => {
       const gradient = PANEL_BG_GRADIENTS[idx % PANEL_BG_GRADIENTS.length];
       const speaker = panel.speechBubbles[0]?.speaker?.toUpperCase()?.trim() || 'NARRATOR';
 
@@ -65,41 +29,7 @@ export async function runComicProductionAgent(
       else if (speaker.includes('ARCHER')) avatarIcon = '🤖';
       else if (speaker.includes('NARRATOR')) avatarIcon = '📖';
 
-      const charSheet = characterDesignSheets[speaker] || defaultCharSheet;
-      const framing = mapPanelStyleToFraming(panel.panelStyle);
-      const action = `${panel.sceneDescription}. ${panel.visualFocusPrompt}`;
-      const panelSeed = page.pageNum * 100 + panel.panelNum;
-
-      let panelImageUrl: string | undefined = undefined;
-
-      // BEST-EFFORT OPTIONAL PANEL ARTWORK GENERATION
-      if (apiKey && apiKey.trim()) {
-        try {
-          const result = await generatePanelArtwork({
-            apiKey,
-            characterDesignSheet: charSheet,
-            sceneFraming: framing,
-            characterAction: action,
-            visualStyle,
-            seed: panelSeed,
-          });
-
-          if (result.imageUrl && !result.imageUrl.includes('Fallback')) {
-            panelImageUrl = result.imageUrl;
-            totalArtGenerated++;
-          } else {
-            // Optional fallback to text-only treatment
-            totalTextFallback++;
-          }
-        } catch (err) {
-          console.log(`Panel Page ${page.pageNum} Panel ${panel.panelNum}: Using Illustrated Text treatment.`);
-          totalTextFallback++;
-        }
-      } else {
-        totalTextFallback++;
-      }
-
-      renderedPanels.push({
+      return {
         pageNum: page.pageNum,
         panelNum: panel.panelNum,
         sceneDescription: panel.sceneDescription,
@@ -109,18 +39,16 @@ export async function runComicProductionAgent(
         speechBubbles: panel.speechBubbles,
         visualSoundFX: panel.visualSoundFX,
         panelStyle: panel.panelStyle,
-        imageUrl: panelImageUrl, // Best-effort: undefined if text-only
-      });
-    }
+      };
+    });
 
-    pages.push({
+    return {
       pageNum: page.pageNum,
       pageTitle: page.pageTitle,
       isKeyframeSplashPage: page.isKeyframeSplashPage,
-      pageImageUrl: renderedPanels[0]?.imageUrl,
       panels: renderedPanels,
-    });
-  }
+    };
+  });
 
   const manifest: ProductionManifest = {
     issueNum: script.issueNum || 1,
@@ -131,7 +59,7 @@ export async function runComicProductionAgent(
   };
 
   const totalPanels = pages.reduce((acc, p) => acc + p.panels.length, 0);
-  const logMessage = `Comic Production Agent: ✅ Issue published! ${pages.length} pages (${totalPanels} panels). ${totalArtGenerated} AI illustrated panels, ${totalTextFallback} graphic text panels.`;
+  const logMessage = `Comic Production Agent: ✅ Graphic Novel Issue #${manifest.issueNum} published! ${pages.length} pages (${totalPanels} panels) rendered in clean Graphic Text format.`;
 
   return { manifest, logMessage };
 }

@@ -1,29 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ProductionManifest, RenderedComicPanel } from '@/lib/types';
-import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, ZoomIn, ZoomOut, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { ProductionManifest } from '@/lib/types';
+import { ChevronLeft, ChevronRight, Sparkles, CheckCircle2, ZoomIn, ZoomOut, BookOpen, Layers } from 'lucide-react';
 
 interface ComicBookReaderProps {
   manifest: ProductionManifest;
   onApprove?: () => void;
-}
-
-function getBubblePositionClasses(position?: string): string {
-  switch (position) {
-    case 'top-left':
-      return 'top-3 left-3';
-    case 'top-right':
-      return 'top-3 right-3';
-    case 'bottom-left':
-      return 'bottom-3 left-3';
-    case 'bottom-right':
-      return 'bottom-3 right-3';
-    case 'center':
-      return 'top-1/3 left-1/2 -translate-x-1/2';
-    default:
-      return 'top-4 right-4';
-  }
 }
 
 export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onApprove }) => {
@@ -65,7 +48,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5" /> {manifest.totalPages} GRAPHIC PAGES READY
+            <BookOpen className="w-3.5 h-3.5" /> {manifest.totalPages} GRAPHIC PAGES
           </span>
           {onApprove && (
             <button
@@ -131,131 +114,97 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
       </div>
 
-      {/* FULL-PAGE COMIC CANVAS WITH UNIFORM 12PX BLACK GUTTERS */}
+      {/* SINGLE CONSOLIDATED GRAPHIC NOVEL PAGE VIEW (NORMAL DOCUMENT FLOW, ZERO OVERLAPS) */}
       {activePage && (
         <div className="bg-slate-elevated border-2 border-slate-border rounded-xl p-6 space-y-4 shadow-2xl relative overflow-hidden flex flex-col items-center">
-          {/* UNOBTRUSIVE SMALL CORNER PRINT INDICIA TEXT */}
+          {/* SMALL CORNER PRINT INDICIA TEXT */}
           <div className="w-full flex items-center justify-between text-[11px] font-mono text-surface-muted border-b border-slate-border/50 pb-2">
-            <span>{manifest.title.toUpperCase()} // ISSUE #{manifest.issueNum}</span>
-            <span className="text-gold font-bold">PAGE {activePage.pageNum} OF {manifest.totalPages}</span>
+            <span className="text-white font-bold">{manifest.title.toUpperCase()} // ISSUE #{manifest.issueNum}</span>
+            <span className="text-gold font-bold">PAGE {activePage.pageNum} OF {manifest.totalPages} ({activePage.pageTitle})</span>
           </div>
 
           {/* LITERAL COMIC PAGE GRID CANVAS WITH 12PX GUTTERS */}
           <div className="w-full flex justify-center items-center py-2 overflow-auto scrollbar-thin">
             <div
-              className="bg-black p-3 rounded-lg border-4 border-slate-950 shadow-2xl transition-all duration-300 max-w-4xl w-full"
+              className="bg-black p-4 rounded-xl border-4 border-slate-950 shadow-2xl transition-all duration-300 max-w-4xl w-full"
               style={{ width: `${zoomLevel}%` }}
             >
-              {/* PAGE PANEL GRID TEMPLATE WITH 12PX GUTTERS (`gap-3`) */}
-              <div className={`grid gap-3 ${activePage.isKeyframeSplashPage ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+              {/* PAGE PANEL GRID TEMPLATE WITH 12PX GUTTERS (`gap-4`) */}
+              <div className={`grid gap-4 ${activePage.isKeyframeSplashPage ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
                 {activePage.panels.map((panel) => (
                   <div
                     key={panel.panelNum}
-                    className="relative aspect-[4/3] rounded overflow-hidden border-2 border-slate-900 shadow-xl bg-charcoal group flex flex-col justify-between"
+                    className={`bg-gradient-to-br ${panel.bgGradient} p-5 rounded-xl border-2 border-slate-900 shadow-2xl flex flex-col justify-between space-y-4 relative overflow-hidden`}
                   >
-                    {/* PANEL BACKGROUND: REAL AI ARTWORK OR DELIBERATE ILLUSTRATED TEXT GRADIENT */}
-                    {panel.imageUrl ? (
-                      <img
-                        src={panel.imageUrl}
-                        alt={`Page ${panel.pageNum} Panel ${panel.panelNum}`}
-                        className="w-full h-full object-cover block group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      /* DELIBERATE "ILLUSTRATED TEXT" PANEL TREATMENT (STANDS ALONE AS INTENTIONAL DESIGN) */
-                      <div className={`w-full h-full bg-gradient-to-br ${panel.bgGradient} p-5 flex flex-col justify-between relative overflow-hidden`}>
-                        {/* Background Decorative Pattern */}
-                        <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
-
-                        {/* Top Panel Header Badge */}
-                        <div className="relative z-10 flex items-center justify-between">
-                          <span className="font-mono text-[10px] bg-slate-950/80 text-gold px-2.5 py-0.5 rounded border border-gold/30 font-bold uppercase tracking-wider">
-                            PANEL #{panel.panelNum}
-                          </span>
-                          <span className="text-lg">{panel.avatarIcon}</span>
-                        </div>
-
-                        {/* PROMINENT GRAPHIC NOVEL SCRIPT NARRATIVE BOX */}
-                        <div className="relative z-10 bg-slate-950/85 backdrop-blur-md p-3.5 rounded-lg border-l-4 border-l-gold border border-white/10 shadow-2xl my-auto space-y-1">
-                          <span className="font-mono text-[9px] uppercase font-black text-cyan tracking-widest block">
-                            SCENE DIRECTION // {panel.panelStyle.toUpperCase()}
-                          </span>
-                          <p className="font-sans text-xs italic text-slate-200 leading-relaxed">
-                            "{panel.sceneDescription}"
-                          </p>
-                        </div>
+                    {/* PANEL HEADER BAR: Panel Number, Style Tag, Inline SFX Badge (In Normal Flow) */}
+                    <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs bg-slate-950/80 text-gold px-2.5 py-1 rounded border border-gold/30 font-bold uppercase tracking-wider">
+                          PANEL #{panel.panelNum}
+                        </span>
+                        <span className="font-mono text-[10px] bg-cyan/15 text-cyan border border-cyan/30 px-2 py-0.5 rounded uppercase font-bold">
+                          {panel.panelStyle || 'STANDARD'}
+                        </span>
                       </div>
-                    )}
 
-                    {/* OVERLAY: STYLIZED VECTOR SOUND EFFECT */}
-                    {panel.visualSoundFX && (
-                      <div className="absolute bottom-3 right-3 pointer-events-none z-20">
-                        <div className="font-display font-black text-xl text-yellow-300 bg-red-600 px-2.5 py-0.5 rounded border-2 border-slate-950 shadow-[0_0_12px_rgba(239,68,68,0.8)] rotate-[-6deg] uppercase tracking-widest italic">
+                      {/* INLINE SFX BADGE IN NORMAL FLOW */}
+                      {panel.visualSoundFX && (
+                        <span className="font-display font-black text-xs text-yellow-300 bg-red-600 px-2.5 py-1 rounded border border-slate-950 shadow-md uppercase tracking-wider rotate-[-2deg]">
                           ⚡ {panel.visualSoundFX}
-                        </div>
-                      </div>
-                    )}
+                        </span>
+                      )}
+                    </div>
 
-                    {/* OVERLAY: SPEECH BUBBLES POSITIONED RELATIVE TO SpeechBubble.position */}
-                    {panel.speechBubbles.map((sb) => {
-                      if (sb.bubbleType === 'caption') {
+                    {/* SCENE DESCRIPTION (GRAPHIC NOVEL SCRIPT DIRECTION BOX) */}
+                    <div className="bg-slate-950/85 backdrop-blur-md p-3.5 rounded-lg border-l-4 border-l-gold border border-white/10 shadow-lg space-y-1">
+                      <span className="font-mono text-[9px] uppercase font-black text-cyan tracking-widest block">
+                        SCENE DIRECTION:
+                      </span>
+                      <p className="font-sans text-xs italic text-slate-200 leading-relaxed">
+                        "{panel.sceneDescription}"
+                      </p>
+                    </div>
+
+                    {/* STACKED DIALOGUE BALLOONS & CAPTIONS IN NORMAL DOCUMENT FLOW (NO ABSOLUTE OVERLAPS) */}
+                    <div className="space-y-3 pt-1">
+                      {panel.speechBubbles.map((sb) => {
+                        if (sb.bubbleType === 'caption') {
+                          return (
+                            <div
+                              key={sb.id}
+                              className="bg-yellow-400 text-slate-950 font-mono text-xs font-bold p-3 rounded-md border-2 border-slate-950 shadow-md"
+                            >
+                              <span className="text-[9px] uppercase font-black block text-yellow-950 mb-0.5">NARRATION CAPTION:</span>
+                              {sb.text}
+                            </div>
+                          );
+                        }
                         return (
                           <div
                             key={sb.id}
-                            className="absolute top-2 left-2 bg-yellow-400 text-slate-950 font-mono text-[10px] font-bold p-2 max-w-[180px] shadow-lg rounded-none border border-slate-900 pointer-events-auto z-10"
+                            className="relative bg-white text-slate-950 p-3.5 rounded-2xl border-2 border-slate-950 shadow-xl"
                           >
-                            <span className="text-[8px] uppercase font-black block text-yellow-950">NARRATION:</span>
-                            {sb.text}
+                            <span className="text-[10px] font-mono font-bold text-crimson block uppercase tracking-wider mb-0.5">
+                              {sb.speaker}:
+                            </span>
+                            <p className="font-sans text-xs font-black uppercase tracking-tight leading-snug">
+                              "{sb.text}"
+                            </p>
+                            {/* SVG Speech Bubble Pointer Tail */}
+                            <svg
+                              className="absolute -bottom-2.5 left-6 w-4 h-3 text-white"
+                              viewBox="0 0 10 10"
+                              fill="currentColor"
+                            >
+                              <path d="M0 0 L10 0 L2 10 Z" stroke="#000" strokeWidth="1" />
+                            </svg>
                           </div>
                         );
-                      }
-                      const posClass = getBubblePositionClasses(sb.position);
-                      return (
-                        <div
-                          key={sb.id}
-                          className={`absolute ${posClass} bg-white text-slate-950 p-2.5 rounded-[1.5rem] border-2 border-slate-950 shadow-2xl max-w-[200px] pointer-events-auto z-20`}
-                        >
-                          <span className="text-[9px] font-mono font-bold text-crimson block uppercase mb-0.5">
-                            {sb.speaker}:
-                          </span>
-                          <p className="font-sans text-[11px] font-black uppercase tracking-tight leading-tight">
-                            "{sb.text}"
-                          </p>
-                          {/* SVG Speech Bubble Pointer Tail */}
-                          <svg
-                            className="absolute -bottom-2.5 left-4 w-4 h-3 text-white"
-                            viewBox="0 0 10 10"
-                            fill="currentColor"
-                          >
-                            <path d="M0 0 L10 0 L2 10 Z" stroke="#000" strokeWidth="1" />
-                          </svg>
-                        </div>
-                      );
-                    })}
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* SCRIPT PANEL BREAKDOWN SUMMARY */}
-          <div className="w-full space-y-3 pt-4 border-t border-slate-border/60 font-mono text-xs">
-            <span className="text-gold uppercase block font-semibold flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4 text-gold" /> PAGE #{activePage.pageNum} SCRIPT DATA
-            </span>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {activePage.panels.map((panel) => (
-                <div key={panel.panelNum} className="bg-charcoal p-3.5 rounded-lg border border-slate-border/50 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-crimson font-bold">PANEL #{panel.panelNum}</span>
-                    {panel.visualSoundFX && (
-                      <span className="text-yellow-300 font-bold bg-red-600 px-2 py-0.5 rounded text-[10px]">
-                        ⚡ {panel.visualSoundFX}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-surface-muted text-[11px] font-sans italic">{panel.sceneDescription}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -283,13 +232,9 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
                   <span className="text-crimson font-bold">PAGE #{p.pageNum}</span>
                   <span className="text-[10px] text-cyan font-bold">{p.panels.length} PANELS</span>
                 </div>
-                {p.panels[0]?.imageUrl ? (
-                  <img src={p.panels[0].imageUrl} alt={p.pageTitle} className="w-full h-24 object-cover rounded border border-slate-border mb-1.5" />
-                ) : (
-                  <div className={`w-full h-24 bg-gradient-to-br ${p.panels[0]?.bgGradient || 'from-slate-900 to-charcoal'} rounded border border-slate-border mb-1.5 flex items-center justify-center text-[10px] text-gold font-bold`}>
-                    ILLUSTRATED TEXT
-                  </div>
-                )}
+                <div className={`w-full h-20 bg-gradient-to-br ${p.panels[0]?.bgGradient || 'from-slate-900 to-charcoal'} rounded border border-slate-border mb-1.5 flex items-center justify-center text-[10px] text-gold font-bold p-2 text-center`}>
+                  GRAPHIC TEXT
+                </div>
                 <div className="truncate text-white font-sans text-[11px]">{p.pageTitle}</div>
               </button>
             );
