@@ -3,27 +3,26 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prompt, visualStyle, pageNum, panelNum } = body;
+    const { prompt, visualStyle, pageNum, type } = body;
 
-    const basePrompt = prompt || 'Cyberpunk technician in rainy slum room holding glowing neural drive';
-    const styleModifier = visualStyle || 'Dark Noir Cyberpunk comic book illustration, high contrast, vibrant neon lighting, cinematic graphic novel panel art';
+    const basePrompt = prompt || 'Full page comic book layout with panels and gutter lines';
+    const styleModifier = visualStyle || 'Dark Noir Cyberpunk comic book illustration, high contrast, vibrant neon lighting, professional graphic novel page art';
 
-    const fullImagePrompt = encodeURIComponent(`${basePrompt}, ${styleModifier}`);
+    const fullPagePrompt = encodeURIComponent(`Full page comic book page layout with panels and dark gutter lines, ${basePrompt}, ${styleModifier}`);
     const seed = Math.floor(Math.random() * 100000);
 
-    // Dynamic AI Image Generation REST URL (Pollinations AI Engine)
-    const imageUrl = `https://image.pollinations.ai/prompt/${fullImagePrompt}?width=800&height=600&seed=${seed}&nologo=true`;
+    // Dynamic AI Full-Page Comic Image Generation REST URL
+    const imageUrl = `https://image.pollinations.ai/prompt/${fullPagePrompt}?width=900&height=1200&seed=${seed}&nologo=true`;
 
     return NextResponse.json({
       success: true,
       pageNum,
-      panelNum,
       imageUrl,
     });
   } catch (error: any) {
-    console.error('Error generating comic panel image:', error);
+    console.error('Error generating full comic page image:', error);
     return NextResponse.json(
-      { success: false, error: error.message || 'Failed to generate comic panel image' },
+      { success: false, error: error.message || 'Failed to generate full comic page image' },
       { status: 500 }
     );
   }

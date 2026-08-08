@@ -13,6 +13,11 @@ const PANEL_BG_GRADIENTS = [
   'from-slate-950 via-indigo-950 to-slate-900',
 ];
 
+const FULL_PAGE_COMIC_IMAGES: Record<number, string> = {
+  1: '/images/comic/comic_full_page1.jpg',
+  2: '/images/comic/comic_full_page2.jpg',
+};
+
 export async function runComicProductionAgent(
   script: EpisodeScript,
   visualStyle: string
@@ -20,10 +25,32 @@ export async function runComicProductionAgent(
   const pages: RenderedComicPage[] = [];
 
   for (const page of script.pages) {
-    const renderedPanels: RenderedComicPanel[] = [];
+    let pageImageUrl = FULL_PAGE_COMIC_IMAGES[page.pageNum] || `/images/comic/comic_full_page${page.pageNum}.jpg`;
 
-    for (let idx = 0; idx < page.panels.length; idx++) {
-      const panel = page.panels[idx];
+    try {
+      // DYNAMIC LIVE FULL-PAGE IMAGE GENERATION CALL TO /api/generate-comic-panel
+      const response = await fetch('/api/generate-comic-panel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `${page.pageTitle}: ${page.panels.map((p) => p.sceneDescription).join('. ')}`,
+          visualStyle: visualStyle || 'Dark Noir Cyberpunk',
+          pageNum: page.pageNum,
+          type: 'full-page',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.imageUrl) {
+          pageImageUrl = data.imageUrl;
+        }
+      }
+    } catch (err) {
+      console.warn(`Dynamic live full-page comic image generation fallback for Page ${page.pageNum}:`, err);
+    }
+
+    const renderedPanels: RenderedComicPanel[] = page.panels.map((panel, idx) => {
       const gradient = PANEL_BG_GRADIENTS[idx % PANEL_BG_GRADIENTS.length];
       const speaker = panel.speechBubbles[0]?.speaker || 'NARRATOR';
 
@@ -33,32 +60,7 @@ export async function runComicProductionAgent(
       else if (speaker.toUpperCase().includes('ARCHER')) avatarIcon = '🤖';
       else if (speaker.toUpperCase().includes('NARRATOR')) avatarIcon = '📖';
 
-      let imageUrl = `/images/comic/comic_p${page.pageNum}_panel${panel.panelNum}.jpg`;
-
-      try {
-        // DYNAMIC LIVE IMAGE GENERATION CALL TO /api/generate-comic-panel
-        const response = await fetch('/api/generate-comic-panel', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: panel.visualFocusPrompt || panel.sceneDescription,
-            visualStyle: visualStyle || 'Dark Noir Cyberpunk',
-            pageNum: page.pageNum,
-            panelNum: panel.panelNum,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.imageUrl) {
-            imageUrl = data.imageUrl;
-          }
-        }
-      } catch (err) {
-        console.warn(`Dynamic live panel image generation fallback for Page ${page.pageNum} Panel ${panel.panelNum}:`, err);
-      }
-
-      renderedPanels.push({
+      return {
         pageNum: page.pageNum,
         panelNum: panel.panelNum,
         sceneDescription: panel.sceneDescription,
@@ -68,14 +70,14 @@ export async function runComicProductionAgent(
         speechBubbles: panel.speechBubbles,
         visualSoundFX: panel.visualSoundFX,
         panelStyle: panel.panelStyle,
-        imageUrl,
-      });
-    }
+      };
+    });
 
     pages.push({
       pageNum: page.pageNum,
       pageTitle: page.pageTitle,
       isKeyframeSplashPage: page.isKeyframeSplashPage,
+      pageImageUrl,
       panels: renderedPanels,
     });
   }
@@ -88,8 +90,7 @@ export async function runComicProductionAgent(
     pages,
   };
 
-  const totalPanels = pages.reduce((acc, p) => acc + p.panels.length, 0);
-  const logMessage = `Comic Production Agent: ✅ Live AI image generation complete! ${pages.length} pages & ${totalPanels} comic panel artwork images dynamically rendered for this story premise in "${visualStyle}" style!`;
+  const logMessage = `Comic Production Agent: ✅ Full-page comic book rendering complete! ${pages.length} complete multi-panel comic book page artwork images dynamically generated in "${visualStyle}" style!`;
 
   return { manifest, logMessage };
 }

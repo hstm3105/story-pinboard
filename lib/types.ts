@@ -160,6 +160,7 @@ export interface RenderedComicPage {
   pageNum: number;
   pageTitle: string;
   isKeyframeSplashPage: boolean;
+  pageImageUrl?: string;
   panels: RenderedComicPanel[];
 }
 

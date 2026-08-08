@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProductionManifest } from '@/lib/types';
-import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, Eye, Zap, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, Maximize2, ZoomIn, ZoomOut, Image as ImageIcon, Layers } from 'lucide-react';
 
 interface ComicBookReaderProps {
   manifest: ProductionManifest;
@@ -11,6 +11,7 @@ interface ComicBookReaderProps {
 
 export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onApprove }) => {
   const [activePageIndex, setActivePageIndex] = useState(0);
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
   const activePage = manifest.pages[activePageIndex] || manifest.pages[0];
 
   const handlePrev = () => {
@@ -21,13 +22,25 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
     if (activePageIndex < manifest.pages.length - 1) setActivePageIndex(activePageIndex + 1);
   };
 
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 25, 200));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 25, 75));
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(100);
+  };
+
   return (
     <div className="bg-slate border border-slate-border rounded-xl p-6 space-y-6 shadow-2xl">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-border pb-4">
         <div>
           <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 06 // ILLUSTRATED GRAPHIC NOVEL READER
+            SURFACE 06 // FULL-PAGE GRAPHIC NOVEL READER
           </span>
           <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
             {manifest.title} — Issue #{manifest.issueNum} ({manifest.visualStyle})
@@ -35,7 +48,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
-            <ImageIcon className="w-3.5 h-3.5" /> AI ARTWORK GENERATED
+            <ImageIcon className="w-3.5 h-3.5" /> {manifest.totalPages} FULL COMIC PAGES
           </span>
           {onApprove && (
             <button
@@ -48,36 +61,64 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
       </div>
 
-      {/* PAGE NAVIGATION CONTROLS BAR */}
-      <div className="bg-charcoal border border-slate-border rounded-xl p-4 flex items-center justify-between font-mono text-xs">
-        <button
-          onClick={handlePrev}
-          disabled={activePageIndex === 0}
-          className="flex items-center gap-1.5 bg-slate hover:bg-slate-elevated px-3.5 py-1.5 rounded border border-slate-border disabled:opacity-30 text-white font-bold transition-all"
-        >
-          <ChevronLeft className="w-4 h-4" /> Previous Page
-        </button>
-
+      {/* PAGE NAVIGATION & ZOOM CONTROLS BAR */}
+      <div className="bg-charcoal border border-slate-border rounded-xl p-4 flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
+        {/* Page Switcher Buttons */}
         <div className="flex items-center gap-2">
-          <span className="text-surface-muted">PAGE</span>
+          <button
+            onClick={handlePrev}
+            disabled={activePageIndex === 0}
+            className="flex items-center gap-1.5 bg-slate hover:bg-slate-elevated px-3.5 py-1.5 rounded border border-slate-border disabled:opacity-30 text-white font-bold transition-all"
+          >
+            <ChevronLeft className="w-4 h-4" /> Previous Page
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={activePageIndex === manifest.pages.length - 1}
+            className="flex items-center gap-1.5 bg-crimson hover:bg-crimson-dark px-3.5 py-1.5 rounded text-white font-bold transition-all disabled:opacity-30 shadow-md"
+          >
+            Next Page <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Page Indicator */}
+        <div className="flex items-center gap-2">
+          <span className="text-surface-muted">COMIC PAGE</span>
           <span className="text-crimson font-bold text-base">{activePageIndex + 1}</span>
           <span className="text-surface-muted">OF {manifest.pages.length}</span>
         </div>
 
-        <button
-          onClick={handleNext}
-          disabled={activePageIndex === manifest.pages.length - 1}
-          className="flex items-center gap-1.5 bg-crimson hover:bg-crimson-dark px-3.5 py-1.5 rounded text-white font-bold transition-all disabled:opacity-30 shadow-md"
-        >
-          Next Page <ChevronRight className="w-4 h-4" />
-        </button>
+        {/* Canvas Zoom Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleZoomOut}
+            className="p-1.5 bg-slate hover:bg-slate-elevated rounded border border-slate-border text-surface-muted hover:text-white"
+            title="Zoom Out"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </button>
+          <span className="text-cyan font-bold w-12 text-center">{zoomLevel}%</span>
+          <button
+            onClick={handleZoomIn}
+            className="p-1.5 bg-slate hover:bg-slate-elevated rounded border border-slate-border text-surface-muted hover:text-white"
+            title="Zoom In"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleResetZoom}
+            className="px-2.5 py-1 bg-slate hover:bg-slate-elevated rounded border border-slate-border text-surface-muted hover:text-white text-[11px]"
+          >
+            Fit Page
+          </button>
+        </div>
       </div>
 
-      {/* MAIN COMIC PAGE CANVAS DISPLAY */}
+      {/* FULL-PAGE COMIC CANVAS DISPLAY */}
       {activePage && (
-        <div className="bg-slate-elevated border-2 border-slate-border rounded-xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
+        <div className="bg-slate-elevated border-2 border-slate-border rounded-xl p-6 space-y-6 shadow-2xl relative overflow-hidden flex flex-col items-center">
           {/* Page Banner Header */}
-          <div className="flex items-center justify-between border-b border-slate-border/60 pb-3">
+          <div className="w-full flex items-center justify-between border-b border-slate-border/60 pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-gold" />
               <span className="font-display font-bold text-lg text-white uppercase">
@@ -91,101 +132,80 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
             )}
           </div>
 
-          {/* COMIC PANELS GRID (Responsive 2x2 or Full Splash) */}
-          <div className={`grid gap-6 ${activePage.isKeyframeSplashPage ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-            {activePage.panels.map((panel) => (
-              <div
-                key={panel.panelNum}
-                className="relative border-4 border-slate-900 rounded-xl overflow-hidden shadow-2xl group flex flex-col justify-between min-h-[360px] bg-charcoal"
-              >
-                {/* Generated AI Comic Panel Background Artwork */}
-                {panel.imageUrl ? (
-                  <div className="absolute inset-0 z-0">
-                    <img
-                      src={panel.imageUrl}
-                      alt={panel.visualFocusPrompt}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
-                  </div>
-                ) : (
-                  <div className={`absolute inset-0 z-0 bg-gradient-to-br ${panel.bgGradient}`} />
-                )}
-
-                {/* Top Panel Bar */}
-                <div className="relative z-10 p-4 flex items-center justify-between bg-black/60 backdrop-blur-sm border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs bg-gold text-slate-950 px-2 py-0.5 rounded font-black">
-                      PANEL #{panel.panelNum}
-                    </span>
-                    <span className="text-xl">{panel.avatarIcon}</span>
-                  </div>
-
-                  {/* Visual Sound FX Callout Badge */}
-                  {panel.visualSoundFX && (
-                    <span className="font-display font-black text-sm text-yellow-300 bg-red-600 px-3 py-1 rounded shadow-[0_0_15px_rgba(239,68,68,0.9)] rotate-[-3deg] uppercase tracking-widest border-2 border-yellow-300 animate-pulse">
-                      ⚡ {panel.visualSoundFX}
-                    </span>
-                  )}
+          {/* LITERAL FULL-PAGE COMIC ARTWORK IMAGE */}
+          <div className="w-full flex justify-center items-center py-2 overflow-auto scrollbar-thin">
+            <div
+              className="relative shadow-2xl rounded-lg overflow-hidden border-4 border-slate-900 transition-all duration-300 max-w-4xl"
+              style={{ width: `${zoomLevel}%` }}
+            >
+              {activePage.pageImageUrl ? (
+                <img
+                  src={activePage.pageImageUrl}
+                  alt={activePage.pageTitle}
+                  className="w-full h-auto object-contain block shadow-2xl"
+                />
+              ) : (
+                <div className="bg-charcoal p-12 text-center font-mono text-xs text-surface-muted">
+                  Full Page Artwork Rendering...
                 </div>
+              )}
+            </div>
+          </div>
 
-                {/* Bottom Speech Bubbles & Narration Overlay */}
-                <div className="relative z-10 p-5 space-y-3">
-                  {panel.speechBubbles.map((bubble) => {
-                    if (bubble.bubbleType === 'caption') {
-                      return (
-                        <div key={bubble.id} className="bg-yellow-400 text-slate-950 border-2 border-yellow-600 font-mono text-xs font-bold p-3 rounded shadow-xl">
-                          <span className="text-[10px] uppercase font-black block text-yellow-950 mb-0.5">NARRATION CAPTION:</span>
-                          {bubble.text}
-                        </div>
-                      );
-                    }
-                    if (bubble.bubbleType === 'shout') {
-                      return (
-                        <div key={bubble.id} className="bg-red-600 text-white font-display text-sm font-black p-3.5 rounded-xl border-2 border-yellow-300 shadow-2xl uppercase tracking-wide">
-                          <span className="text-[10px] text-yellow-300 font-mono block mb-0.5">{bubble.speaker} (SHOUTING):</span>
-                          "{bubble.text}"
-                        </div>
-                      );
-                    }
-                    return (
-                      <div key={bubble.id} className="bg-white/95 backdrop-blur-md text-slate-950 font-sans text-xs font-bold p-3.5 rounded-2xl border-2 border-slate-900 shadow-2xl">
-                        <span className="text-[10px] font-mono font-bold text-crimson block uppercase mb-0.5">
-                          {bubble.speaker}:
-                        </span>
-                        "{bubble.text}"
-                      </div>
-                    );
-                  })}
+          {/* SCRIPT PANEL BREAKDOWN DETAILS BELOW PAGE */}
+          <div className="w-full space-y-3 pt-4 border-t border-slate-border/60">
+            <span className="font-mono text-xs text-gold uppercase block font-semibold flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-gold" /> PAGE #{activePage.pageNum} PANEL BREAKDOWN & DIALOGUE
+            </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {activePage.panels.map((panel) => (
+                <div key={panel.panelNum} className="bg-charcoal p-3.5 rounded-lg border border-slate-border/50 font-mono text-xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-crimson font-bold">PANEL #{panel.panelNum}</span>
+                    {panel.visualSoundFX && (
+                      <span className="text-yellow-300 font-bold bg-red-600 px-2 py-0.5 rounded text-[10px]">
+                        ⚡ {panel.visualSoundFX}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-surface-muted text-[11px] font-sans italic">{panel.sceneDescription}</p>
+                  {panel.speechBubbles.map((sb) => (
+                    <div key={sb.id} className="bg-slate p-2 rounded text-[11px]">
+                      <span className="text-gold font-bold">{sb.speaker}:</span> "{sb.text}"
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* PAGE THUMBNAILS SELECTOR BAR */}
+      {/* FULL COMIC PAGE THUMBNAILS SELECTOR BAR */}
       <div className="space-y-2 pt-2">
         <span className="font-mono text-xs text-gold uppercase block font-semibold">
-          ILLUSTRATED ISSUE #1 THUMBNAIL PAGES:
+          FULL COMIC PAGES THUMBNAILS:
         </span>
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-thin">
           {manifest.pages.map((p, idx) => {
             const isSel = activePageIndex === idx;
             return (
               <button
                 key={p.pageNum}
                 onClick={() => setActivePageIndex(idx)}
-                className={`p-3 rounded-lg border text-left font-mono text-xs shrink-0 w-40 transition-all ${
+                className={`p-3 rounded-lg border text-left font-mono text-xs shrink-0 w-44 transition-all ${
                   isSel
                     ? 'bg-slate-elevated border-crimson text-white shadow-lg ring-1 ring-crimson font-bold'
                     : 'bg-charcoal border-slate-border text-surface-muted hover:text-white'
                 }`}
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <span className="text-crimson font-bold">PAGE #{p.pageNum}</span>
                   <span className="text-[10px] text-cyan font-bold">{p.panels.length} PANELS</span>
                 </div>
+                {p.pageImageUrl && (
+                  <img src={p.pageImageUrl} alt={p.pageTitle} className="w-full h-24 object-cover rounded border border-slate-border mb-1.5" />
+                )}
                 <div className="truncate text-white font-sans text-[11px]">{p.pageTitle}</div>
               </button>
             );
