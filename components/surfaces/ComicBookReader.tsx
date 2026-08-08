@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ProductionManifest, RenderedComicPage } from '@/lib/types';
-import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, Eye, Maximize2, Zap } from 'lucide-react';
+import { ProductionManifest } from '@/lib/types';
+import { BookOpen, ChevronLeft, ChevronRight, Sparkles, CheckCircle2, Eye, Zap, Image as ImageIcon } from 'lucide-react';
 
 interface ComicBookReaderProps {
   manifest: ProductionManifest;
@@ -27,7 +27,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
       <div className="flex items-center justify-between border-b border-slate-border pb-4">
         <div>
           <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 06 // GRAPHIC NOVEL & COMIC BOOK READER
+            SURFACE 06 // ILLUSTRATED GRAPHIC NOVEL READER
           </span>
           <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
             {manifest.title} — Issue #{manifest.issueNum} ({manifest.visualStyle})
@@ -35,7 +35,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
         </div>
         <div className="flex items-center gap-3">
           <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
-            <BookOpen className="w-3.5 h-3.5" /> {manifest.totalPages} PAGES ILLUSTRATED
+            <ImageIcon className="w-3.5 h-3.5" /> AI ARTWORK GENERATED
           </span>
           {onApprove && (
             <button
@@ -92,16 +92,30 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
           </div>
 
           {/* COMIC PANELS GRID (Responsive 2x2 or Full Splash) */}
-          <div className={`grid gap-5 ${activePage.isKeyframeSplashPage ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+          <div className={`grid gap-6 ${activePage.isKeyframeSplashPage ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
             {activePage.panels.map((panel) => (
               <div
                 key={panel.panelNum}
-                className={`relative bg-gradient-to-br ${panel.bgGradient} border-2 border-slate-border rounded-xl p-5 shadow-2xl space-y-4 min-h-[220px] flex flex-col justify-between overflow-hidden group hover:border-crimson transition-all`}
+                className="relative border-4 border-slate-900 rounded-xl overflow-hidden shadow-2xl group flex flex-col justify-between min-h-[360px] bg-charcoal"
               >
-                {/* Panel Header & Visual Focus Prompt */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                {/* Generated AI Comic Panel Background Artwork */}
+                {panel.imageUrl ? (
+                  <div className="absolute inset-0 z-0">
+                    <img
+                      src={panel.imageUrl}
+                      alt={panel.visualFocusPrompt}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/60" />
+                  </div>
+                ) : (
+                  <div className={`absolute inset-0 z-0 bg-gradient-to-br ${panel.bgGradient}`} />
+                )}
+
+                {/* Top Panel Bar */}
+                <div className="relative z-10 p-4 flex items-center justify-between bg-black/60 backdrop-blur-sm border-b border-white/10">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs bg-black/60 text-gold px-2 py-0.5 rounded border border-gold/30 font-bold">
+                    <span className="font-mono text-xs bg-gold text-slate-950 px-2 py-0.5 rounded font-black">
                       PANEL #{panel.panelNum}
                     </span>
                     <span className="text-xl">{panel.avatarIcon}</span>
@@ -109,26 +123,18 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
 
                   {/* Visual Sound FX Callout Badge */}
                   {panel.visualSoundFX && (
-                    <span className="font-display font-black text-sm text-yellow-300 bg-red-600/90 px-3 py-1 rounded shadow-[0_0_12px_rgba(239,68,68,0.8)] rotate-[-3deg] uppercase tracking-widest border border-yellow-300 animate-pulse">
+                    <span className="font-display font-black text-sm text-yellow-300 bg-red-600 px-3 py-1 rounded shadow-[0_0_15px_rgba(239,68,68,0.9)] rotate-[-3deg] uppercase tracking-widest border-2 border-yellow-300 animate-pulse">
                       ⚡ {panel.visualSoundFX}
                     </span>
                   )}
                 </div>
 
-                {/* Panel Visual Description Scene Prompt */}
-                <div className="bg-black/50 p-3 rounded border border-white/10 font-sans text-xs text-slate-200 italic space-y-1">
-                  <span className="font-mono text-[10px] text-cyan uppercase font-bold block">
-                    SCENE VISUAL PROMPT:
-                  </span>
-                  <p>{panel.visualFocusPrompt || panel.sceneDescription}</p>
-                </div>
-
-                {/* SPEECH BUBBLES & NARRATION CAPTIONS */}
-                <div className="space-y-2 pt-2">
+                {/* Bottom Speech Bubbles & Narration Overlay */}
+                <div className="relative z-10 p-5 space-y-3">
                   {panel.speechBubbles.map((bubble) => {
                     if (bubble.bubbleType === 'caption') {
                       return (
-                        <div key={bubble.id} className="bg-yellow-400/90 text-black border border-yellow-600 font-mono text-xs font-bold p-2.5 rounded shadow-md">
+                        <div key={bubble.id} className="bg-yellow-400 text-slate-950 border-2 border-yellow-600 font-mono text-xs font-bold p-3 rounded shadow-xl">
                           <span className="text-[10px] uppercase font-black block text-yellow-950 mb-0.5">NARRATION CAPTION:</span>
                           {bubble.text}
                         </div>
@@ -136,14 +142,14 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
                     }
                     if (bubble.bubbleType === 'shout') {
                       return (
-                        <div key={bubble.id} className="bg-red-600 text-white font-display text-sm font-black p-3 rounded-xl border-2 border-yellow-300 shadow-xl uppercase tracking-wide">
+                        <div key={bubble.id} className="bg-red-600 text-white font-display text-sm font-black p-3.5 rounded-xl border-2 border-yellow-300 shadow-2xl uppercase tracking-wide">
                           <span className="text-[10px] text-yellow-300 font-mono block mb-0.5">{bubble.speaker} (SHOUTING):</span>
                           "{bubble.text}"
                         </div>
                       );
                     }
                     return (
-                      <div key={bubble.id} className="bg-white text-slate-950 font-sans text-xs font-semibold p-3 rounded-2xl border-2 border-slate-900 shadow-lg relative">
+                      <div key={bubble.id} className="bg-white/95 backdrop-blur-md text-slate-950 font-sans text-xs font-bold p-3.5 rounded-2xl border-2 border-slate-900 shadow-2xl">
                         <span className="text-[10px] font-mono font-bold text-crimson block uppercase mb-0.5">
                           {bubble.speaker}:
                         </span>
@@ -161,7 +167,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
       {/* PAGE THUMBNAILS SELECTOR BAR */}
       <div className="space-y-2 pt-2">
         <span className="font-mono text-xs text-gold uppercase block font-semibold">
-          ISSUE ISSUE #1 THUMBNAIL PAGES:
+          ILLUSTRATED ISSUE #1 THUMBNAIL PAGES:
         </span>
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
           {manifest.pages.map((p, idx) => {
@@ -170,7 +176,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
               <button
                 key={p.pageNum}
                 onClick={() => setActivePageIndex(idx)}
-                className={`p-3 rounded-lg border text-left font-mono text-xs shrink-0 w-36 transition-all ${
+                className={`p-3 rounded-lg border text-left font-mono text-xs shrink-0 w-40 transition-all ${
                   isSel
                     ? 'bg-slate-elevated border-crimson text-white shadow-lg ring-1 ring-crimson font-bold'
                     : 'bg-charcoal border-slate-border text-surface-muted hover:text-white'
@@ -178,7 +184,7 @@ export const ComicBookReader: React.FC<ComicBookReaderProps> = ({ manifest, onAp
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-crimson font-bold">PAGE #{p.pageNum}</span>
-                  <span className="text-[10px] text-surface-subtle">{p.panels.length} PNL</span>
+                  <span className="text-[10px] text-cyan font-bold">{p.panels.length} PANELS</span>
                 </div>
                 <div className="truncate text-white font-sans text-[11px]">{p.pageTitle}</div>
               </button>

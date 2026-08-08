@@ -153,6 +153,7 @@ export interface RenderedComicPanel {
   speechBubbles: SpeechBubble[];
   visualSoundFX?: string;
   panelStyle: string;
+  imageUrl?: string;
 }
 
 export interface RenderedComicPage {

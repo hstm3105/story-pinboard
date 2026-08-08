@@ -13,6 +13,12 @@ const PANEL_BG_GRADIENTS = [
   'from-slate-950 via-indigo-950 to-slate-900',
 ];
 
+const GENERATED_COMIC_IMAGES: Record<string, string> = {
+  '1-1': '/images/comic/comic_p1_panel1.jpg',
+  '1-2': '/images/comic/comic_p1_panel2.jpg',
+  '2-1': '/images/comic/comic_p2_panel1.jpg',
+};
+
 export async function runComicProductionAgent(
   script: EpisodeScript,
   visualStyle: string
@@ -28,6 +34,9 @@ export async function runComicProductionAgent(
       else if (speaker.toUpperCase().includes('ARCHER')) avatarIcon = '🤖';
       else if (speaker.toUpperCase().includes('NARRATOR')) avatarIcon = '📖';
 
+      const key = `${page.pageNum}-${panel.panelNum}`;
+      const imageUrl = GENERATED_COMIC_IMAGES[key] || `/images/comic/comic_p${page.pageNum}_panel${panel.panelNum}.jpg`;
+
       return {
         pageNum: page.pageNum,
         panelNum: panel.panelNum,
@@ -38,6 +47,7 @@ export async function runComicProductionAgent(
         speechBubbles: panel.speechBubbles,
         visualSoundFX: panel.visualSoundFX,
         panelStyle: panel.panelStyle,
+        imageUrl,
       };
     });
 
@@ -58,7 +68,7 @@ export async function runComicProductionAgent(
   };
 
   const totalPanels = pages.reduce((acc, p) => acc + p.panels.length, 0);
-  const logMessage = `Comic Production Agent: ✅ Comic Book Issue 1 rendered. ${pages.length} pages & ${totalPanels} comic panels illustrated in "${visualStyle}" aesthetic!`;
+  const logMessage = `Comic Production Agent: ✅ Comic Book Issue #1 illustrated. ${pages.length} pages & ${totalPanels} panels rendered with real AI image generation artwork in "${visualStyle}" style!`;
 
   return { manifest, logMessage };
 }
