@@ -18,7 +18,9 @@ async function callGeminiAPI(
     throw new Error('MISSING_API_KEY: Please enter a valid Gemini API Key in Settings to run the real AI agents.');
   }
 
-  const modelCandidates = [requestedModel, 'gemini-2.0-flash', 'gemini-1.5-flash'];
+  const modelCandidates = requestedModel === 'gemini-3.1-flash-lite' 
+    ? ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']
+    : ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
   let lastError: Error | null = null;
 
   for (const modelCandidate of modelCandidates) {
