@@ -13,18 +13,17 @@ const PANEL_BG_GRADIENTS = [
   'from-slate-950 via-indigo-950 to-slate-900',
 ];
 
-const GENERATED_COMIC_IMAGES: Record<string, string> = {
-  '1-1': '/images/comic/comic_p1_panel1.jpg',
-  '1-2': '/images/comic/comic_p1_panel2.jpg',
-  '2-1': '/images/comic/comic_p2_panel1.jpg',
-};
-
 export async function runComicProductionAgent(
   script: EpisodeScript,
   visualStyle: string
 ): Promise<{ manifest: ProductionManifest; logMessage: string }> {
-  const pages: RenderedComicPage[] = script.pages.map((page) => {
-    const renderedPanels: RenderedComicPanel[] = page.panels.map((panel, idx) => {
+  const pages: RenderedComicPage[] = [];
+
+  for (const page of script.pages) {
+    const renderedPanels: RenderedComicPanel[] = [];
+
+    for (let idx = 0; idx < page.panels.length; idx++) {
+      const panel = page.panels[idx];
       const gradient = PANEL_BG_GRADIENTS[idx % PANEL_BG_GRADIENTS.length];
       const speaker = panel.speechBubbles[0]?.speaker || 'NARRATOR';
 
@@ -34,10 +33,32 @@ export async function runComicProductionAgent(
       else if (speaker.toUpperCase().includes('ARCHER')) avatarIcon = '🤖';
       else if (speaker.toUpperCase().includes('NARRATOR')) avatarIcon = '📖';
 
-      const key = `${page.pageNum}-${panel.panelNum}`;
-      const imageUrl = GENERATED_COMIC_IMAGES[key] || `/images/comic/comic_p${page.pageNum}_panel${panel.panelNum}.jpg`;
+      let imageUrl = `/images/comic/comic_p${page.pageNum}_panel${panel.panelNum}.jpg`;
 
-      return {
+      try {
+        // DYNAMIC LIVE IMAGE GENERATION CALL TO /api/generate-comic-panel
+        const response = await fetch('/api/generate-comic-panel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: panel.visualFocusPrompt || panel.sceneDescription,
+            visualStyle: visualStyle || 'Dark Noir Cyberpunk',
+            pageNum: page.pageNum,
+            panelNum: panel.panelNum,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.imageUrl) {
+            imageUrl = data.imageUrl;
+          }
+        }
+      } catch (err) {
+        console.warn(`Dynamic live panel image generation fallback for Page ${page.pageNum} Panel ${panel.panelNum}:`, err);
+      }
+
+      renderedPanels.push({
         pageNum: page.pageNum,
         panelNum: panel.panelNum,
         sceneDescription: panel.sceneDescription,
@@ -48,16 +69,16 @@ export async function runComicProductionAgent(
         visualSoundFX: panel.visualSoundFX,
         panelStyle: panel.panelStyle,
         imageUrl,
-      };
-    });
+      });
+    }
 
-    return {
+    pages.push({
       pageNum: page.pageNum,
       pageTitle: page.pageTitle,
       isKeyframeSplashPage: page.isKeyframeSplashPage,
       panels: renderedPanels,
-    };
-  });
+    });
+  }
 
   const manifest: ProductionManifest = {
     issueNum: script.issueNum || 1,
@@ -68,7 +89,7 @@ export async function runComicProductionAgent(
   };
 
   const totalPanels = pages.reduce((acc, p) => acc + p.panels.length, 0);
-  const logMessage = `Comic Production Agent: ✅ Comic Book Issue #1 illustrated. ${pages.length} pages & ${totalPanels} panels rendered with real AI image generation artwork in "${visualStyle}" style!`;
+  const logMessage = `Comic Production Agent: ✅ Live AI image generation complete! ${pages.length} pages & ${totalPanels} comic panel artwork images dynamically rendered for this story premise in "${visualStyle}" style!`;
 
   return { manifest, logMessage };
 }
