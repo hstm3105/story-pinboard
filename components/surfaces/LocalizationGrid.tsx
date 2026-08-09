@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { LocalizedLanguageProfile } from '@/lib/types';
-import { CheckCircle2, RefreshCw, Globe, Compass, MessageSquare, Zap } from 'lucide-react';
+import { CheckCircle2, RefreshCw, Globe, MessageSquare, Zap } from 'lucide-react';
+import { Card, Badge, Button, SectionHeader } from '../ui';
 
 interface LocalizationGridProps {
   notes: LocalizedLanguageProfile[];
@@ -15,57 +16,45 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
   const activeNote = notes[selectedIndex] || notes[0];
 
   return (
-    <div className="bg-slate border border-slate-border rounded-xl p-6 space-y-6 shadow-2xl">
+    <Card variant="elevated" depth="high" className="p-6 space-y-6">
       {/* Surface Header */}
-      <div className="flex items-center justify-between border-b border-slate-border pb-4">
-        <div>
-          <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 05 // LOCALIZATION AGENT DETAIL VIEW
-          </span>
-          <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
-            Comic Speech Bubble & Sound FX Lettering Localization
-          </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onRegenerate}
-            className="font-mono text-xs text-surface-muted hover:text-surface-text px-3 py-1.5 rounded bg-charcoal border border-slate-border flex items-center gap-1.5"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Regenerate Lettering Notes
-          </button>
-          <button
-            onClick={onApprove}
-            className="font-mono text-xs font-bold text-charcoal bg-gold hover:bg-gold/90 px-4 py-1.5 rounded flex items-center gap-1.5 shadow-md"
-          >
-            <CheckCircle2 className="w-4 h-4" /> Finalize Publication
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        label="SURFACE 05 // LOCALIZATION AGENT DETAIL VIEW"
+        title="Comic Speech Bubble & Sound FX Lettering Localization"
+        action={
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={onRegenerate}>
+              Regenerate Notes
+            </Button>
+            <Button variant="gold" size="sm" icon={<CheckCircle2 className="w-4 h-4" />} onClick={onApprove}>
+              Finalize Publication
+            </Button>
+          </div>
+        }
+      />
 
       {/* Language Tabs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
         {notes.map((n, idx) => {
           const isSelected = selectedIndex === idx;
           return (
-            <button
+            <Card
               key={n.language}
+              variant={isSelected ? 'active' : 'flat'}
+              interactive
               onClick={() => setSelectedIndex(idx)}
-              className={`p-3 rounded-lg border text-left font-mono text-xs flex items-center gap-2 transition-all ${
-                isSelected
-                  ? 'bg-slate-elevated border-crimson text-white shadow-md font-bold'
-                  : 'bg-charcoal border-slate-border text-surface-muted hover:text-surface-text'
-              }`}
+              className="p-3 font-mono text-xs flex items-center gap-2"
             >
               <span className="text-base">{n.flag}</span>
               <span className="truncate">{n.language}</span>
-            </button>
+            </Card>
           );
         })}
       </div>
 
       {/* Active Language Profile */}
       {activeNote && (
-        <div className="bg-charcoal border border-slate-border rounded-xl p-6 space-y-5">
+        <Card variant="flat" depth="medium" className="p-6 space-y-5">
           <div className="flex items-center justify-between border-b border-slate-border/50 pb-3">
             <div className="flex items-center gap-3">
               <span className="text-3xl">{activeNote.flag}</span>
@@ -76,9 +65,9 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
                 <span className="font-sans text-xs text-gold italic">{activeNote.translatedTitle}</span>
               </div>
             </div>
-            <span className="font-mono text-xs text-cyan bg-cyan/10 px-3 py-1 rounded border border-cyan/30 flex items-center gap-1">
-              <Globe className="w-3.5 h-3.5" /> COMIC LETTERING READY
-            </span>
+            <Badge variant="cyan" size="md" icon={<Globe className="w-3.5 h-3.5" />}>
+              COMIC LETTERING READY
+            </Badge>
           </div>
 
           {/* LOCALIZED SPEECH BUBBLES */}
@@ -89,14 +78,16 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
               </span>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {activeNote.localizedSpeechBubbles.map((sb, idx) => (
-                  <div key={idx} className="bg-slate p-3.5 rounded-lg border border-slate-border/50 font-mono text-xs space-y-1">
+                  <Card key={idx} variant="elevated" depth="low" className="p-3.5 font-mono text-xs space-y-1">
                     <div className="flex items-center justify-between text-crimson font-bold">
                       <span>{sb.speaker}</span>
-                      <span className="text-[10px] text-surface-subtle">SPEECH BUBBLE</span>
+                      <Badge variant="neutral" size="sm">
+                        BUBBLE
+                      </Badge>
                     </div>
                     <div className="text-surface-muted text-[11px]">Original: "{sb.originalText}"</div>
                     <div className="text-white font-bold font-sans">"{sb.localizedText}"</div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -110,16 +101,16 @@ export const LocalizationGrid: React.FC<LocalizationGridProps> = ({ notes, onApp
               </span>
               <div className="flex flex-wrap gap-3">
                 {Object.entries(activeNote.localizedSoundFXLettering).map(([orig, loc]) => (
-                  <div key={orig} className="bg-slate px-3.5 py-2 rounded-lg border border-slate-border/50 font-mono text-xs flex items-center gap-2">
+                  <Card key={orig} variant="flat" depth="low" className="px-3.5 py-2 font-mono text-xs flex items-center gap-2">
                     <span className="text-surface-muted line-through">{orig}</span>
                     <span className="text-gold font-black uppercase text-sm font-display">➔ {loc}</span>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </div>
           )}
-        </div>
+        </Card>
       )}
-    </div>
+    </Card>
   );
 };

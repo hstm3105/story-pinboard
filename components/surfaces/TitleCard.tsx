@@ -3,7 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { StoryBible } from '@/lib/types';
-import { Palette, Sparkles, UserCheck } from 'lucide-react';
+import { Palette, UserCheck } from 'lucide-react';
+import { Card, Badge, SectionHeader } from '../ui';
 
 interface TitleCardProps {
   concept: StoryBible;
@@ -11,31 +12,28 @@ interface TitleCardProps {
 
 export const TitleCard: React.FC<TitleCardProps> = ({ concept }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="relative overflow-hidden bg-gradient-to-r from-slate-elevated via-slate to-charcoal border-l-4 border-l-crimson border border-slate-border rounded-xl p-8 shadow-2xl space-y-4"
+    <Card
+      variant="elevated"
+      depth="high"
+      className="border-l-4 border-l-crimson p-8 space-y-4"
     >
       {/* Top Header Metadata */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Palette className="w-5 h-5 text-crimson" />
-          <span className="font-mono text-xs text-cyan uppercase tracking-widest font-bold">
-            DIRECTOR COMIC REVEAL // {concept.visualAestheticStyle || 'Dark Noir Cyberpunk'}
-          </span>
-        </div>
-        <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-3 py-1 rounded-full font-bold">
-          GRAPHIC BIBLE APPROVED
-        </span>
-      </div>
+      <SectionHeader
+        label={`DIRECTOR COMIC REVEAL // ${concept.visualAestheticStyle || 'Dark Noir Cyberpunk'}`}
+        title=""
+        action={
+          <Badge variant="gold" size="md">
+            GRAPHIC BIBLE APPROVED
+          </Badge>
+        }
+      />
 
       {/* Hero Series Title */}
       <motion.h1
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
-        className="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-white leading-none"
+        className="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-white leading-none pt-2"
       >
         {concept.title}
       </motion.h1>
@@ -62,13 +60,13 @@ export const TitleCard: React.FC<TitleCardProps> = ({ concept }) => {
         </p>
 
         {/* PROTAGONIST EMOTIONAL ARC FIELDS */}
-        <div className="flex flex-wrap gap-4 text-xs font-mono pt-2">
-          <span className="bg-charcoal px-3 py-1.5 rounded border border-slate-border text-surface-muted">
-            <strong className="text-crimson font-bold">STARTING EMOTIONAL STATE:</strong> {concept.protagonistStartingEmotionalState}
-          </span>
-          <span className="bg-charcoal px-3 py-1.5 rounded border border-slate-border text-surface-muted">
-            <strong className="text-gold font-bold">ENDING EMOTIONAL STATE:</strong> {concept.protagonistEndingEmotionalState}
-          </span>
+        <div className="flex flex-wrap gap-3 text-xs font-mono pt-2">
+          <Badge variant="crimson" size="md">
+            STARTING: {concept.protagonistStartingEmotionalState}
+          </Badge>
+          <Badge variant="gold" size="md">
+            ENDING: {concept.protagonistEndingEmotionalState}
+          </Badge>
         </div>
       </motion.div>
 
@@ -78,27 +76,29 @@ export const TitleCard: React.FC<TitleCardProps> = ({ concept }) => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className="space-y-2 pt-3 border-t border-slate-border"
+          className="space-y-3 pt-4 border-t border-slate-border"
         >
           <span className="font-mono text-xs text-gold uppercase flex items-center gap-1.5 font-bold">
             <UserCheck className="w-4 h-4 text-gold" /> CHARACTER VISUAL KEYFRAME DESIGN BIBLE
           </span>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-surface-muted">
             {concept.characterVisualKeyframes.map((char) => (
-              <div key={char.characterName} className="bg-charcoal/80 p-3.5 rounded-lg border border-slate-border/60 space-y-1">
+              <Card key={char.characterName} variant="flat" depth="low" className="p-3.5 space-y-1">
                 <div className="flex items-center justify-between text-crimson font-bold">
                   <span>{char.characterName}</span>
-                  <span className="text-cyan text-[10px]">{char.colorTheme}</span>
+                  <Badge variant="cyan" size="sm">
+                    {char.colorTheme}
+                  </Badge>
                 </div>
-                <p className="text-white text-[11px] font-sans">{char.visualAppearance}</p>
+                <p className="text-white text-[11px] font-sans pt-1">{char.visualAppearance}</p>
                 <div className="text-[10px] text-gold italic pt-0.5">
                   <strong>Signature Costume:</strong> {char.signatureCostume}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </motion.div>
       )}
-    </motion.div>
+    </Card>
   );
 };

@@ -3,6 +3,7 @@
 import React from 'react';
 import { AuditCheckResult } from '@/lib/types';
 import { CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Card, Badge, Button, SectionHeader } from '../ui';
 
 interface SafetyChecklistProps {
   checks: AuditCheckResult[];
@@ -12,52 +13,44 @@ interface SafetyChecklistProps {
 
 export const SafetyChecklist: React.FC<SafetyChecklistProps> = ({ checks, onApprove, onRegenerate }) => {
   return (
-    <div className="bg-slate border border-slate-border rounded-xl p-6 space-y-6 shadow-2xl">
+    <Card variant="elevated" depth="high" className="p-6 space-y-6">
       {/* Surface Header */}
-      <div className="flex items-center justify-between border-b border-slate-border pb-4">
-        <div>
-          <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 04 // SAFETY AUDITOR DETAIL VIEW
-          </span>
-          <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
-            Safety Auditor 4-Point Compliance Audit
-          </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onRegenerate}
-            className="font-mono text-xs text-surface-muted hover:text-surface-text px-3 py-1.5 rounded bg-charcoal border border-slate-border flex items-center gap-1.5"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Re-Audit Pipeline
-          </button>
-          <button
-            onClick={onApprove}
-            className="font-mono text-xs font-bold text-charcoal bg-gold hover:bg-gold/90 px-4 py-1.5 rounded flex items-center gap-1.5"
-          >
-            <CheckCircle2 className="w-4 h-4" /> Approve & Proceed to Voice Agent
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        label="SURFACE 04 // SAFETY AUDITOR DETAIL VIEW"
+        title="Safety Auditor 4-Point Compliance Audit"
+        action={
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={onRegenerate}>
+              Re-Audit Pipeline
+            </Button>
+            <Button variant="gold" size="sm" icon={<CheckCircle2 className="w-4 h-4" />} onClick={onApprove}>
+              Approve & Proceed
+            </Button>
+          </div>
+        }
+      />
 
       {/* Certification Badges Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {checks.map((chk, idx) => (
-          <div
+          <Card
             key={idx}
-            className="bg-charcoal border border-slate-border rounded-xl p-5 space-y-3 flex flex-col justify-between"
+            variant={chk.passed ? 'gold-active' : 'active'}
+            depth="medium"
+            className="p-5 space-y-3 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
               <span className="font-display font-bold text-lg uppercase text-surface-text">
                 {chk.category}
               </span>
               {chk.passed ? (
-                <span className="bg-gold/15 text-gold border border-gold/40 px-2.5 py-1 rounded font-mono text-[10px] font-bold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> PASSED
-                </span>
+                <Badge variant="gold" size="sm" icon={<CheckCircle2 className="w-3.5 h-3.5" />}>
+                  PASSED
+                </Badge>
               ) : (
-                <span className="bg-crimson/15 text-crimson border border-crimson/40 px-2.5 py-1 rounded font-mono text-[10px] font-bold flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5" /> FLAGGED
-                </span>
+                <Badge variant="crimson" size="sm" icon={<AlertTriangle className="w-3.5 h-3.5" />}>
+                  FLAGGED
+                </Badge>
               )}
             </div>
 
@@ -73,9 +66,9 @@ export const SafetyChecklist: React.FC<SafetyChecklistProps> = ({ checks, onAppr
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

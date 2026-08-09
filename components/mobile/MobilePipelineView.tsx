@@ -3,6 +3,7 @@
 import React from 'react';
 import { AgentStage, StoryBible, TelemetryEvent } from '@/lib/types';
 import { Clapperboard, CheckCircle2, Activity, Clock } from 'lucide-react';
+import { Card, Badge, SectionHeader } from '../ui';
 
 interface MobilePipelineViewProps {
   stages: AgentStage[];
@@ -23,35 +24,37 @@ export const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
     <div className="p-4 space-y-6 max-w-lg mx-auto pb-24">
       {/* Mobile Telemetry Indicator */}
       {latestEvent && (
-        <div className="bg-charcoal border border-cyan/40 p-3 rounded-lg flex items-center gap-2 font-mono text-xs text-cyan">
-          <div className="w-2.5 h-2.5 rounded-full bg-cyan animate-pulse" />
+        <Card variant="flat" depth="low" className="p-3 border-cyan/40 flex items-center gap-2 font-mono text-xs text-cyan">
+          <div className="w-2.5 h-2.5 rounded-full bg-cyan animate-pulse shrink-0" />
           <span className="truncate">{latestEvent.message}</span>
-        </div>
+        </Card>
       )}
 
       {/* Hero Concept Card */}
       {concept && (
-        <div className="bg-slate border-l-4 border-l-crimson border border-slate-border p-5 rounded-xl space-y-2">
+        <Card variant="elevated" depth="high" className="border-l-4 border-l-crimson p-5 space-y-2">
           <div className="flex items-center gap-2 text-crimson">
             <Clapperboard className="w-4 h-4" />
-            <span className="font-mono text-xs font-bold uppercase">{concept.genreBlend}</span>
+            <Badge variant="crimson" size="sm">
+              {concept.genreBlend}
+            </Badge>
           </div>
           <h2 className="font-display font-bold text-2xl uppercase text-white">{concept.title}</h2>
           <p className="font-sans text-xs text-surface-muted italic">"{concept.tagline}"</p>
-        </div>
+        </Card>
       )}
 
       {/* Stacked Agent Stage Cards */}
       <div className="space-y-3">
-        <h3 className="font-mono text-xs text-gold uppercase tracking-widest">
-          PRODUCTION STAGE ROW
-        </h3>
+        <SectionHeader label="MOBILE PIPELINE ROW" title="Production Stages" />
 
         {stages.map((st) => (
-          <div
+          <Card
             key={st.id}
+            variant={st.status === 'in_progress' ? 'active' : st.status === 'complete' ? 'gold-active' : 'flat'}
+            interactive
             onClick={() => onOpenDetail(st.id)}
-            className="bg-slate border border-slate-border p-4 rounded-xl flex items-center justify-between cursor-pointer hover:border-crimson"
+            className="p-4 flex items-center justify-between"
           >
             <div>
               <h4 className="font-display font-bold text-base uppercase text-white">{st.name}</h4>
@@ -62,7 +65,7 @@ export const MobilePipelineView: React.FC<MobilePipelineViewProps> = ({
               {st.status === 'in_progress' && <Activity className="w-5 h-5 text-crimson animate-spin" />}
               {st.status === 'queued' && <Clock className="w-5 h-5 text-surface-subtle" />}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

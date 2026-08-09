@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { EpisodeScript } from '@/lib/types';
-import { BookOpen, RefreshCw, CheckCircle2, Layers, MessageSquare, Zap } from 'lucide-react';
+import { BookOpen, RefreshCw, CheckCircle2, Layers, MessageSquare } from 'lucide-react';
+import { Card, Badge, Button, SectionHeader } from '../ui';
 
 interface TeleprompterViewProps {
   script: EpisodeScript;
@@ -20,32 +21,22 @@ export const TeleprompterView: React.FC<TeleprompterViewProps> = ({
   const activePage = pages[activePageIdx] || pages[0];
 
   return (
-    <div className="bg-slate border border-slate-border rounded-xl p-6 space-y-6 shadow-2xl">
+    <Card variant="elevated" depth="high" className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-border pb-4">
-        <div>
-          <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 03 // SCREENWRITER COMIC SCRIPT VIEW
-          </span>
-          <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
-            Page & Panel Breakdowns, Speech Bubbles & Visual SFX
-          </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onRegenerate}
-            className="font-mono text-xs text-surface-muted hover:text-surface-text px-3 py-1.5 rounded bg-charcoal border border-slate-border flex items-center gap-1.5"
-          >
-            <RefreshCw className="w-3.5 h-3.5" /> Regenerate Script
-          </button>
-          <button
-            onClick={onApprove}
-            className="font-mono text-xs font-bold text-charcoal bg-gold hover:bg-gold/90 px-4 py-1.5 rounded flex items-center gap-1.5 shadow-md"
-          >
-            <CheckCircle2 className="w-4 h-4" /> Approve Comic Script
-          </button>
-        </div>
-      </div>
+      <SectionHeader
+        label="SURFACE 03 // SCREENWRITER COMIC SCRIPT VIEW"
+        title="Page & Panel Breakdowns, Speech Bubbles & Visual SFX"
+        action={
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={onRegenerate}>
+              Regenerate Script
+            </Button>
+            <Button variant="gold" size="sm" icon={<CheckCircle2 className="w-4 h-4" />} onClick={onApprove}>
+              Approve Comic Script
+            </Button>
+          </div>
+        }
+      />
 
       {/* PAGE TAB SWITCHER */}
       {pages.length > 0 && (
@@ -56,20 +47,20 @@ export const TeleprompterView: React.FC<TeleprompterViewProps> = ({
           {pages.map((p, idx) => {
             const isSelected = activePageIdx === idx;
             return (
-              <button
+              <Button
                 key={p.pageNum}
+                variant={isSelected ? 'primary' : 'secondary'}
+                size="sm"
                 onClick={() => setActivePageIdx(idx)}
-                className={`px-3.5 py-1.5 rounded font-mono text-xs flex items-center gap-2 shrink-0 border transition-all ${
-                  isSelected
-                    ? 'bg-crimson text-white border-crimson shadow-md font-bold'
-                    : 'bg-charcoal text-surface-muted border-slate-border hover:text-white'
-                }`}
+                className="shrink-0"
               >
                 <span>PAGE {p.pageNum}</span>
                 {p.isKeyframeSplashPage && (
-                  <span className="bg-gold text-charcoal text-[9px] px-1.5 rounded font-black">SPLASH</span>
+                  <Badge variant="gold" size="sm" className="ml-1">
+                    SPLASH
+                  </Badge>
                 )}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -77,7 +68,7 @@ export const TeleprompterView: React.FC<TeleprompterViewProps> = ({
 
       {/* ACTIVE PAGE PANEL SCRIPT SHOWCASE */}
       {activePage && (
-        <div className="bg-charcoal border border-slate-border rounded-xl p-6 space-y-4">
+        <Card variant="flat" depth="medium" className="p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-border/50 pb-3">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-cyan" />
@@ -86,24 +77,24 @@ export const TeleprompterView: React.FC<TeleprompterViewProps> = ({
               </span>
             </div>
             {activePage.isKeyframeSplashPage && (
-              <span className="bg-gold/15 text-gold border border-gold/40 px-3 py-0.5 rounded font-mono text-xs font-bold">
+              <Badge variant="gold" size="md">
                 FULL SPLASH PAGE BREAKDOWN
-              </span>
+              </Badge>
             )}
           </div>
 
           {/* Panel Breakdown Cards */}
           <div className="space-y-4">
             {activePage.panels.map((panel) => (
-              <div key={panel.panelNum} className="bg-slate p-4 rounded-xl border border-slate-border space-y-3">
+              <Card key={panel.panelNum} variant="elevated" depth="low" className="p-4 space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-border/50 pb-2">
-                  <span className="font-mono text-xs text-gold font-bold bg-charcoal px-2.5 py-1 rounded border border-gold/30">
+                  <Badge variant="gold" size="sm">
                     PANEL #{panel.panelNum} ({panel.panelStyle})
-                  </span>
+                  </Badge>
                   {panel.visualSoundFX && (
-                    <span className="font-display font-black text-xs text-yellow-300 bg-red-600 px-2.5 py-0.5 rounded uppercase">
+                    <Badge variant="crimson" size="sm">
                       ⚡ SFX: {panel.visualSoundFX}
-                    </span>
+                    </Badge>
                   )}
                 </div>
 
@@ -124,11 +115,11 @@ export const TeleprompterView: React.FC<TeleprompterViewProps> = ({
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
-        </div>
+        </Card>
       )}
-    </div>
+    </Card>
   );
 };
