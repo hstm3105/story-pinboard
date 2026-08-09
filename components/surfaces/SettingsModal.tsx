@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { AppSettings } from '@/lib/types';
 import { Settings as SettingsIcon, Key, Cpu, Check, X, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Card, Badge, Button, SectionHeader } from '../ui';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -45,96 +47,102 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate border border-slate-border rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-surface-muted hover:text-white p-1 rounded-lg hover:bg-slate-border/50 transition-colors"
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2 }}
+          className="w-full max-w-md"
         >
-          <X className="w-5 h-5" />
-        </button>
-
-        {/* Modal Header */}
-        <div className="flex items-center gap-3 border-b border-slate-border pb-4">
-          <div className="w-10 h-10 rounded-xl bg-crimson/20 border border-crimson/40 flex items-center justify-center text-crimson">
-            <SettingsIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <h2 className="font-display font-bold text-xl uppercase tracking-wide text-white">
-              Studio Engine Settings
-            </h2>
-            <span className="font-mono text-[10px] text-cyan uppercase tracking-widest block">
-              CONFIGURE GEMINI API KEY & MODEL
-            </span>
-          </div>
-        </div>
-
-        {/* Form Controls */}
-        <form onSubmit={handleSave} className="space-y-4">
-          {/* Gemini API Key Input */}
-          <div className="space-y-1.5">
-            <label className="font-mono text-xs text-gold uppercase tracking-wider font-semibold flex items-center gap-1.5">
-              <Key className="w-3.5 h-3.5" /> Gemini API Key
-            </label>
-            <div className="relative">
-              <input
-                type={showKey ? 'text' : 'password'}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter Gemini API key..."
-                className="w-full bg-charcoal border border-slate-border rounded-lg px-3.5 py-2.5 font-mono text-xs text-surface-text focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-muted hover:text-white"
-              >
-                {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <p className="font-sans text-[11px] text-surface-muted">
-              API keys are stored safely in browser session state & localStorage.
-            </p>
-          </div>
-
-          {/* Model Selector */}
-          <div className="space-y-1.5">
-            <label className="font-mono text-xs text-cyan uppercase tracking-wider font-semibold flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5" /> AI Model Selection
-            </label>
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full bg-charcoal border border-slate-border rounded-lg px-3.5 py-2.5 font-mono text-xs text-surface-text focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson"
+          <Card variant="elevated" depth="high" className="p-6 space-y-6 relative border-crimson/40">
+            {/* Close Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="absolute top-4 right-4 p-1.5 min-w-0"
+              title="Close Settings"
             >
-              {models.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <X className="w-4 h-4" />
+            </Button>
 
-          {/* Save Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              className="w-full bg-crimson hover:bg-crimson-dark text-white font-display font-bold text-sm uppercase tracking-wider py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all focus-visible:ring-2 focus-visible:ring-crimson"
-            >
-              {savedSuccess ? (
-                <>
-                  <Check className="w-4 h-4 text-gold" /> Settings Saved!
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" /> Save Settings
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+            {/* Modal Header using SectionHeader primitive */}
+            <SectionHeader
+              label="CONFIGURE GEMINI API KEY & MODEL"
+              title="Studio Engine Settings"
+              action={
+                <Badge variant="crimson" size="sm" icon={<SettingsIcon className="w-3.5 h-3.5" />}>
+                  API ENGINE
+                </Badge>
+              }
+            />
+
+            {/* Form Controls */}
+            <form onSubmit={handleSave} className="space-y-4">
+              {/* Gemini API Key Input */}
+              <div className="space-y-1.5">
+                <label className="font-mono text-xs text-gold uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-gold" /> Gemini API Key
+                </label>
+                <div className="relative">
+                  <input
+                    type={showKey ? 'text' : 'password'}
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter Gemini API key..."
+                    className="w-full bg-charcoal border border-slate-border rounded-lg px-3.5 py-2.5 font-mono text-xs text-surface-text focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowKey(!showKey)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1 min-w-0"
+                  >
+                    {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                </div>
+                <p className="font-sans text-[11px] text-surface-muted">
+                  API keys are stored safely in browser session state & localStorage.
+                </p>
+              </div>
+
+              {/* Model Selector */}
+              <div className="space-y-1.5">
+                <label className="font-mono text-xs text-cyan uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-cyan" /> AI Model Selection
+                </label>
+                <select
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  className="w-full bg-charcoal border border-slate-border rounded-lg px-3.5 py-2.5 font-mono text-xs text-surface-text focus:outline-none focus:border-crimson focus:ring-1 focus:ring-crimson"
+                >
+                  {models.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Save Button */}
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant={savedSuccess ? 'gold' : 'primary'}
+                  size="lg"
+                  className="w-full shadow-lg"
+                  icon={savedSuccess ? <Check className="w-4 h-4 text-charcoal" /> : <Sparkles className="w-4 h-4" />}
+                >
+                  {savedSuccess ? 'Settings Saved!' : 'Save Settings'}
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </motion.div>
       </div>
-    </div>
+    </AnimatePresence>
   );
 };

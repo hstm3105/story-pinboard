@@ -28,6 +28,7 @@ import { TapeDeck } from './TapeDeck';
 import { SettingsModal } from './SettingsModal';
 import { TelemetryTicker } from './TelemetryTicker';
 import { MobilePipelineView } from '../mobile/MobilePipelineView';
+import { Card, Badge, Button, SectionHeader } from '../ui';
 
 import {
   runDirectorAgent,
@@ -39,7 +40,7 @@ import {
 
 import { runComicProductionAgent } from '@/lib/comicProductionAgent';
 
-import { Radio, Settings, Key, AlertCircle, Send, Palette } from 'lucide-react';
+import { Radio, Settings, Key, AlertCircle, Send } from 'lucide-react';
 
 export const PipelineContainer: React.FC = () => {
   const [selectedGenre, setSelectedGenre] = useState<string>('Sci-Fi');
@@ -101,62 +102,71 @@ export const PipelineContainer: React.FC = () => {
     },
   ]);
 
-  // MASTER EXPAND PIPELINE HANDLER
+  const logTelemetry = (agentId: AgentId, stageName: string, message: string) => {
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
+    setTelemetryEvents((prev) => [
+      ...prev,
+      {
+        id: `evt-${Date.now()}-${Math.random()}`,
+        timestamp: timeStr,
+        agentId,
+        stageName,
+        message,
+      },
+    ]);
+  };
+
+  const updateStageStatus = (id: AgentId, status: 'queued' | 'in_progress' | 'complete') => {
+    setStages((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
+  };
+
+  const handleOpenDetail = (id: string) => {
+    setActiveDetailStageId((prev) => (prev === id ? null : id));
+  };
+
+  const handleApproveStage = () => {
+    if (activeDetailStageId === 'director') setActiveDetailStageId('research');
+    else if (activeDetailStageId === 'research') setActiveDetailStageId('screenwriter');
+    else if (activeDetailStageId === 'screenwriter') setActiveDetailStageId('auditor');
+    else if (activeDetailStageId === 'auditor') setActiveDetailStageId('localization');
+    else if (activeDetailStageId === 'localization') setActiveDetailStageId('production');
+    else if (activeDetailStageId === 'production') setActiveDetailStageId(null);
+  };
+
+  const handleRegenerateStage = () => {
+    handleExpandConcept();
+  };
+
   const handleExpandConcept = async () => {
     if (!customPremise.trim()) return;
-
     setIsExpanding(true);
     setPipelineError(null);
 
-    // Reset stages
-    setStages((prev) =>
-      prev.map((st) => ({
-        ...st,
-        status: st.id === 'director' ? 'in_progress' : 'queued',
-      }))
-    );
-
-    const logTelemetry = (agentId: AgentId, stageName: string, message: string) => {
-      setTelemetryEvents((prev) => [
-        ...prev,
-        {
-          id: `evt-${Date.now()}-${Math.random()}`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-          agentId,
-          stageName,
-          message,
-        },
-      ]);
-    };
-
-    const updateStageStatus = (agentId: AgentId, status: 'in_progress' | 'complete') => {
-      setStages((prev) => prev.map((s) => (s.id === agentId ? { ...s, status } : s)));
-    };
-
     try {
       // 1. DIRECTOR AGENT
-      logTelemetry('director', 'Director Agent', `Director Agent: Calling Gemini API (${settings.model}) for "${selectedGenre}" Visual Bible...`);
-      const { storyBible: bible, logMessage: directorLog } = await runDirectorAgent(settings.apiKey, settings.model, selectedGenre, customPremise);
+      updateStageStatus('director', 'in_progress');
+      logTelemetry('director', 'Director Agent', `Director Agent: Analyzing premise "${customPremise.substring(0, 30)}..." for ${selectedGenre}`);
+      const { storyBible: bible, logMessage: dirLog } = await runDirectorAgent(settings.apiKey, settings.model, selectedGenre, customPremise);
       setStoryBible(bible);
       updateStageStatus('director', 'complete');
-      logTelemetry('director', 'Director Agent', directorLog);
+      logTelemetry('director', 'Director Agent', dirLog);
 
       // 2. RESEARCH AGENT
       updateStageStatus('research', 'in_progress');
-      logTelemetry('research', 'Research Agent', `Research Agent: Analyzing panel composition rules & color palette strategy...`);
-      const { researchBrief, logMessage: researchLog } = await runResearchAgent(settings.apiKey, settings.model, selectedGenre, bible);
-      setResearchData(researchBrief);
+      logTelemetry('research', 'Research Agent', `Research Agent: Generating panel grid layout strategy & atmospheric color palette...`);
+      const { researchBrief: brief, logMessage: resLog } = await runResearchAgent(settings.apiKey, settings.model, selectedGenre, bible);
+      setResearchData(brief);
       updateStageStatus('research', 'complete');
-      logTelemetry('research', 'Research Agent', researchLog);
+      logTelemetry('research', 'Research Agent', resLog);
 
       // 3. SCREENWRITER AGENT
       updateStageStatus('screenwriter', 'in_progress');
-      logTelemetry('screenwriter', 'Screenwriter Agent', `Screenwriter Agent: Drafting comic page & panel breakdowns with speech bubbles & visual SFX...`);
-      const { episodeScript: script, lockedEpisodes: locked, logMessage: scriptLog } = await runScreenwriterAgent(settings.apiKey, settings.model, bible, researchBrief);
+      logTelemetry('screenwriter', 'Screenwriter Agent', `Screenwriter Agent: Drafting multi-page comic panel scripts & speech bubbles...`);
+      const { episodeScript: script, lockedEpisodes: eps, logMessage: scrLog } = await runScreenwriterAgent(settings.apiKey, settings.model, bible, brief);
       setEpisodeScript(script);
-      setLockedEpisodes(locked);
+      setLockedEpisodes(eps);
       updateStageStatus('screenwriter', 'complete');
-      logTelemetry('screenwriter', 'Screenwriter Agent', scriptLog);
+      logTelemetry('screenwriter', 'Screenwriter Agent', scrLog);
 
       // 4. SAFETY AUDITOR AGENT
       updateStageStatus('auditor', 'in_progress');
@@ -168,7 +178,7 @@ export const PipelineContainer: React.FC = () => {
 
       // 5. LOCALIZATION AGENT
       updateStageStatus('localization', 'in_progress');
-      logTelemetry('localization', 'Localization Agent', `Localization Agent: Adapting dialogue speech bubbles & sound FX lettering...`);
+      logTelemetry('localization', 'Localization Agent', `Localization Agent: Translating speech bubbles into 5 target comic markets...`);
       const { localizationPackage: locPkg, logMessage: locLog } = await runLocalizationAgent(settings.apiKey, settings.model, bible, script);
       setLocalizationPackage(locPkg);
       updateStageStatus('localization', 'complete');
@@ -176,47 +186,32 @@ export const PipelineContainer: React.FC = () => {
 
       // 6. COMIC PRODUCTION AGENT
       updateStageStatus('production', 'in_progress');
-      logTelemetry('production', 'Comic Production Agent', `Comic Production Agent: Assembling graphic novel issue with per-panel artwork & vector speech bubbles...`);
-      const { manifest: prodManifest, logMessage: prodLog } = await runComicProductionAgent(script, bible.visualAestheticStyle || selectedGenre, settings.apiKey);
-      setProductionManifest(prodManifest);
+      logTelemetry('production', 'Comic Production Agent', `Comic Production Agent: Compiling graphic text panels & lettered comic issue...`);
+      const { manifest, logMessage: prodLog } = await runComicProductionAgent(script, selectedGenre, settings.apiKey);
+      setProductionManifest(manifest);
       updateStageStatus('production', 'complete');
       logTelemetry('production', 'Comic Production Agent', prodLog);
 
-      // Default active detail stage to Production Reader upon completion
-      setActiveDetailStageId('production');
+      setActiveDetailStageId('director');
     } catch (err: any) {
-      console.error('Pipeline execution error:', err);
+      console.error(err);
       setPipelineError(err.message || 'Pipeline execution failed.');
-      logTelemetry('director', 'Error Core', `Pipeline Error: ${err.message}`);
+      logTelemetry('director', 'System Core', `CRITICAL ERROR: ${err.message || 'Execution halted.'}`);
     } finally {
       setIsExpanding(false);
     }
   };
 
-  const handleOpenDetail = (stageId: string) => {
-    setActiveDetailStageId(stageId);
-  };
-
-  const handleApproveStage = () => {
-    if (!activeDetailStageId) return;
-    const stageIndex = stages.findIndex((s) => s.id === activeDetailStageId);
-    if (stageIndex < stages.length - 1) {
-      setActiveDetailStageId(stages[stageIndex + 1].id);
-    }
-  };
-
-  const handleRegenerateStage = () => {
-    handleExpandConcept();
-  };
-
   return (
-    <div className="min-h-screen bg-charcoal text-surface-text flex flex-col justify-between">
-      {/* Top Header Navigation Bar */}
-      <header className="bg-charcoal border-b border-slate-border px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div className="min-h-screen bg-charcoal text-surface-text flex flex-col font-sans selection:bg-crimson selection:text-white">
+      {/* Studio Header Bar */}
+      <header className="bg-slate border-b border-slate-border px-6 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
-          <Radio className="w-6 h-6 text-crimson animate-pulse" />
+          <div className="w-10 h-10 rounded-xl bg-crimson border border-crimson/50 flex items-center justify-center text-white shadow-crimson-glow">
+            <Radio className="w-5 h-5 animate-pulse" />
+          </div>
           <div>
-            <h1 className="font-display text-xl font-black uppercase tracking-tight text-white leading-none">
+            <h1 className="font-display font-black text-2xl uppercase tracking-tight text-white leading-none">
               REEL-TO-REEL // COMIC STUDIO
             </h1>
             <span className="font-mono text-[10px] text-cyan uppercase tracking-widest block">
@@ -226,18 +221,19 @@ export const PipelineContainer: React.FC = () => {
         </div>
 
         {/* SETTINGS BUTTON ON TOP RIGHT */}
-        <button
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => setIsSettingsOpen(true)}
-          className="flex items-center gap-2 bg-slate hover:bg-slate-elevated px-4 py-2 rounded-lg border border-slate-border font-mono text-xs text-gold transition-all shadow-md focus-visible:ring-2 focus-visible:ring-crimson"
+          icon={<Settings className="w-4 h-4 text-gold" />}
         >
-          <Settings className="w-4 h-4 text-gold" />
           <span>Settings</span>
           {settings.apiKey ? (
-            <span className="w-2 h-2 rounded-full bg-gold shadow-[0_0_8px_#D9A441]" title="API Key Configured" />
+            <span className="w-2 h-2 rounded-full bg-gold shadow-[0_0_8px_#D9A441] ml-1" title="API Key Configured" />
           ) : (
-            <span className="w-2 h-2 rounded-full bg-crimson shadow-[0_0_8px_#C4302B]" title="API Key Required" />
+            <span className="w-2 h-2 rounded-full bg-crimson shadow-[0_0_8px_#C4302B] ml-1" title="API Key Required" />
           )}
-        </button>
+        </Button>
       </header>
 
       {/* API Key Missing or Error Notice Banner */}
@@ -249,12 +245,9 @@ export const PipelineContainer: React.FC = () => {
               {pipelineError || 'Gemini API Key Required: Click "Settings" to enter your API Key for real-time AI Agent execution.'}
             </span>
           </div>
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="bg-crimson text-white px-3.5 py-1.5 rounded font-bold hover:bg-crimson-dark flex items-center gap-1.5 shadow-md"
-          >
-            <Key className="w-3.5 h-3.5" /> Open Settings
-          </button>
+          <Button variant="primary" size="sm" icon={<Key className="w-3.5 h-3.5" />} onClick={() => setIsSettingsOpen(true)}>
+            Open Settings
+          </Button>
         </div>
       )}
 
@@ -271,20 +264,16 @@ export const PipelineContainer: React.FC = () => {
         
         {/* LEFT COLUMN PANEL: PROMPT STUDIO & TELEMETRY LOG (~38% Width) */}
         <aside className="w-[38%] space-y-6 flex flex-col justify-between">
-          <div className="space-y-5 bg-slate border border-slate-border rounded-xl p-6 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-                  STUDIO INPUT // COMIC PROMPT CONTROL
-                </span>
-                <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-white">
-                  Comic Series Studio
-                </h2>
-              </div>
-              <span className="font-mono text-xs bg-crimson/15 text-crimson border border-crimson/30 px-3 py-1 rounded font-bold">
-                {selectedGenre}
-              </span>
-            </div>
+          <Card variant="elevated" depth="high" className="p-6 space-y-5">
+            <SectionHeader
+              label="STUDIO INPUT // COMIC PROMPT CONTROL"
+              title="Comic Series Studio"
+              action={
+                <Badge variant="crimson" size="sm">
+                  {selectedGenre}
+                </Badge>
+              }
+            />
 
             {/* Premise Prompt Input Box */}
             <div className="space-y-2">
@@ -301,34 +290,28 @@ export const PipelineContainer: React.FC = () => {
             </div>
 
             {/* Run Pipeline CTA */}
-            <button
+            <Button
+              variant="primary"
+              size="lg"
               onClick={handleExpandConcept}
               disabled={isExpanding || !customPremise.trim()}
-              className="w-full py-4 bg-crimson hover:bg-crimson-dark disabled:opacity-50 text-white font-display font-black uppercase tracking-wider rounded-xl shadow-xl flex items-center justify-center gap-3 transition-all transform active:scale-98"
+              isLoading={isExpanding}
+              icon={<Send className="w-5 h-5" />}
+              className="w-full py-4 text-base shadow-xl"
             >
-              {isExpanding ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Agents Executing...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  <span>⚡ Run Multi-Agent Studio Pipeline</span>
-                </>
-              )}
-            </button>
-          </div>
+              ⚡ Run Multi-Agent Studio Pipeline
+            </Button>
+          </Card>
 
           {/* TELEMETRY TRACE LOG (Dedicated to Left Column Bottom) */}
-          <div className="flex-1 min-h-[320px] bg-slate border border-slate-border rounded-xl p-5 shadow-2xl flex flex-col">
+          <Card variant="elevated" depth="high" className="flex-1 min-h-[320px] p-5 flex flex-col">
             <span className="font-mono text-xs text-gold uppercase tracking-widest block mb-3 font-bold border-b border-slate-border/50 pb-2">
               LIVE AGENT TELEMETRY TRACE LOG
             </span>
             <div className="flex-1 overflow-y-auto max-h-[360px] scrollbar-thin">
               <TelemetryTicker events={telemetryEvents} />
             </div>
-          </div>
+          </Card>
         </aside>
 
         {/* RIGHT COLUMN PANEL: GENRE CATEGORIES & PIPELINE MASTER DECK (~62% Width) */}
