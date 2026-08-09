@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   AgentId,
   AgentStage,
@@ -345,55 +346,105 @@ export const PipelineContainer: React.FC = () => {
             onOpenDetail={handleOpenDetail}
           />
 
-          {/* ACTIVE STAGE DETAIL OVERLAY / REVEAL PANELS */}
-          {/* Surface 1: Title Card / Director's Graphic Bible */}
-          {activeDetailStageId === 'director' && storyBible && (
-            <TitleCard concept={storyBible} />
-          )}
+          {/* ACTIVE STAGE DETAIL OVERLAY / REVEAL PANELS WITH ANIMATEPRESENCE TRANSITIONS */}
+          <AnimatePresence mode="wait">
+            {/* Surface 1: Title Card / Director's Graphic Bible */}
+            {activeDetailStageId === 'director' && storyBible && (
+              <motion.div
+                key="director"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <TitleCard concept={storyBible} />
+              </motion.div>
+            )}
 
-          {/* Research Agent Market & Composition Panel */}
-          {activeDetailStageId === 'research' && researchData && (
-            <ResearchDetailPanel
-              research={researchData}
-              onApprove={handleApproveStage}
-              onRegenerate={handleRegenerateStage}
-            />
-          )}
+            {/* Research Agent Market & Composition Panel */}
+            {activeDetailStageId === 'research' && researchData && (
+              <motion.div
+                key="research"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <ResearchDetailPanel
+                  research={researchData}
+                  onApprove={handleApproveStage}
+                  onRegenerate={handleRegenerateStage}
+                />
+              </motion.div>
+            )}
 
-          {/* Screenwriter Script & Panel Breakdown View */}
-          {activeDetailStageId === 'screenwriter' && episodeScript && (
-            <TeleprompterView
-              script={episodeScript}
-              onApprove={handleApproveStage}
-              onRegenerate={handleRegenerateStage}
-            />
-          )}
+            {/* Screenwriter Script & Panel Breakdown View */}
+            {activeDetailStageId === 'screenwriter' && episodeScript && (
+              <motion.div
+                key="screenwriter"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <TeleprompterView
+                  script={episodeScript}
+                  onApprove={handleApproveStage}
+                  onRegenerate={handleRegenerateStage}
+                />
+              </motion.div>
+            )}
 
-          {/* Safety Auditor Compliance Report */}
-          {activeDetailStageId === 'auditor' && auditReport && (
-            <SafetyChecklist
-              checks={auditReport.checks}
-              onApprove={handleApproveStage}
-              onRegenerate={handleRegenerateStage}
-            />
-          )}
+            {/* Safety Auditor Compliance Report */}
+            {activeDetailStageId === 'auditor' && auditReport && (
+              <motion.div
+                key="auditor"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <SafetyChecklist
+                  checks={auditReport.checks}
+                  onApprove={handleApproveStage}
+                  onRegenerate={handleRegenerateStage}
+                />
+              </motion.div>
+            )}
 
-          {/* Localization Agent Dubbing Deck */}
-          {activeDetailStageId === 'localization' && localizationPackage && (
-            <LocalizationGrid
-              notes={localizationPackage.languages}
-              onApprove={handleApproveStage}
-              onRegenerate={handleRegenerateStage}
-            />
-          )}
+            {/* Localization Agent Dubbing Deck */}
+            {activeDetailStageId === 'localization' && localizationPackage && (
+              <motion.div
+                key="localization"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <LocalizationGrid
+                  notes={localizationPackage.languages}
+                  onApprove={handleApproveStage}
+                  onRegenerate={handleRegenerateStage}
+                />
+              </motion.div>
+            )}
 
-          {/* Comic Production Agent & Graphic Novel Reader Master */}
-          {activeDetailStageId === 'production' && productionManifest && (
-            <ComicBookReader
-              manifest={productionManifest}
-              onApprove={handleApproveStage}
-            />
-          )}
+            {/* Comic Production Agent & Graphic Novel Reader Master */}
+            {activeDetailStageId === 'production' && productionManifest && (
+              <motion.div
+                key="production"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+              >
+                <ComicBookReader
+                  manifest={productionManifest}
+                  onApprove={handleApproveStage}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Surface 4: Tape Deck / Episode Outlines */}
           {lockedEpisodes.length > 0 && <TapeDeck episodes={lockedEpisodes} />}
