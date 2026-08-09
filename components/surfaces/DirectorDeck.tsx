@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sparkles, Heart, ShieldAlert, Cpu, Crown, Search, Flame, Ghost, Landmark } from 'lucide-react';
+import React from 'react';
+import { Heart, ShieldAlert, Cpu, Crown, Search, Flame, Ghost, Landmark } from 'lucide-react';
+import { Card, Badge, SectionHeader } from '../ui';
 
 interface DirectorDeckProps {
   onSelectCategory?: (category: string, samplePremise: string) => void;
@@ -80,43 +81,38 @@ export const DirectorDeck: React.FC<DirectorDeckProps> = ({
   selectedCategory = 'Sci-Fi',
 }) => {
   return (
-    <div className="bg-slate border border-slate-border rounded-xl p-5 space-y-4 shadow-xl">
-      <div className="flex items-center justify-between border-b border-slate-border pb-3">
-        <div>
-          <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-0.5">
-            GENRE SELECTION GRID
-          </span>
-          <h3 className="font-display font-bold text-lg uppercase text-white">
-            Core Production Categories
-          </h3>
-        </div>
-        <span className="font-mono text-xs bg-gold/15 text-gold border border-gold/30 px-2.5 py-1 rounded font-bold">
-          8 GENRES ACTIVE
-        </span>
-      </div>
+    <Card variant="elevated" depth="high" className="p-5 space-y-4">
+      {/* Standardized Section Header with Badge */}
+      <SectionHeader
+        label="GENRE SELECTION GRID"
+        title="Core Production Categories"
+        action={
+          <Badge variant="gold" size="sm">
+            8 GENRES ACTIVE
+          </Badge>
+        }
+      />
 
-      {/* Grid of 8 Generic Categories */}
+      {/* Grid of 8 Generic Categories using Card primitives */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {GENRE_CATEGORIES.map((cat) => {
           const Icon = cat.icon;
           const isSelected = selectedCategory.toLowerCase() === cat.name.toLowerCase();
 
           return (
-            <button
+            <Card
               key={cat.id}
+              variant={isSelected ? 'active' : 'flat'}
+              interactive
               onClick={() => onSelectCategory && onSelectCategory(cat.name, cat.samplePremise)}
-              className={`p-3 rounded-lg border text-left flex items-center gap-2.5 transition-all ${
-                isSelected
-                  ? 'bg-slate-elevated border-crimson text-white shadow-lg ring-1 ring-crimson font-bold'
-                  : 'bg-charcoal border-slate-border text-surface-muted hover:text-white hover:border-slate-border/80'
-              }`}
+              className="p-3 flex items-center gap-2.5 transition-all"
             >
               <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-crimson' : 'text-gold'}`} />
               <span className="font-display text-xs uppercase tracking-wide truncate">{cat.name}</span>
-            </button>
+            </Card>
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 };

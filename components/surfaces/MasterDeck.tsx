@@ -4,6 +4,7 @@ import React from 'react';
 import { AgentStage } from '@/lib/types';
 import { AgentStageCard } from './AgentStageCard';
 import { Cpu } from 'lucide-react';
+import { SectionHeader, Badge } from '../ui';
 
 interface MasterDeckProps {
   stages: AgentStage[];
@@ -18,20 +19,16 @@ export const MasterDeck: React.FC<MasterDeckProps> = ({
 }) => {
   return (
     <section className="w-full space-y-4">
-      {/* Deck Header */}
-      <div className="flex items-center justify-between border-b border-slate-border pb-3">
-        <div>
-          <span className="font-mono text-xs text-cyan uppercase tracking-widest block mb-1">
-            SURFACE 02 // PRODUCTION STATUS ROW
-          </span>
-          <h2 className="font-display text-2xl font-extrabold uppercase tracking-tight text-surface-text">
-            Studio Master Deck
-          </h2>
-        </div>
-        <div className="flex items-center gap-2 font-mono text-xs text-gold bg-gold/10 px-3 py-1.5 rounded-md border border-gold/30">
-          <Cpu className="w-4 h-4 text-gold" /> 6-AGENT PIPELINE
-        </div>
-      </div>
+      {/* Standardized Section Header with Badge */}
+      <SectionHeader
+        label="SURFACE 02 // PRODUCTION STATUS ROW"
+        title="Studio Master Deck"
+        action={
+          <Badge variant="gold" size="md" icon={<Cpu className="w-3.5 h-3.5 text-gold" />}>
+            6-AGENT PIPELINE
+          </Badge>
+        }
+      />
 
       {/* Horizontal Scrollable Row of 6 Agent Cards */}
       <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-thin">

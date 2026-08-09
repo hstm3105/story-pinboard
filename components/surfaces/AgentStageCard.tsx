@@ -3,6 +3,8 @@
 import React from 'react';
 import { AgentStage } from '@/lib/types';
 import { CheckCircle2, Clock, Activity, ArrowRight } from 'lucide-react';
+import { Card, Badge } from '../ui';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AgentStageCardProps {
   stage: AgentStage;
@@ -15,44 +17,55 @@ export const AgentStageCard: React.FC<AgentStageCardProps> = ({ stage, isActive,
     switch (stage.status) {
       case 'queued':
         return (
-          <span className="font-mono text-[10px] uppercase text-surface-subtle bg-slate-border px-2 py-0.5 rounded flex items-center gap-1">
-            <Clock className="w-3 h-3" /> Queued
-          </span>
+          <Badge variant="neutral" size="sm" icon={<Clock className="w-3 h-3" />}>
+            Queued
+          </Badge>
         );
       case 'in_progress':
         return (
-          <span className="font-mono text-[10px] uppercase text-crimson bg-crimson/15 border border-crimson/40 px-2 py-0.5 rounded flex items-center gap-1 animate-pulse">
-            <Activity className="w-3 h-3 animate-spin" /> In Progress
-          </span>
+          <Badge variant="crimson" size="sm" icon={<Activity className="w-3 h-3 animate-spin" />} className="animate-pulse">
+            In Progress
+          </Badge>
         );
       case 'complete':
         return (
-          <span className="font-mono text-[10px] uppercase text-gold bg-gold/15 border border-gold/40 px-2 py-0.5 rounded font-bold flex items-center gap-1">
-            <CheckCircle2 className="w-3 h-3 text-gold" /> Complete
-          </span>
+          <Badge variant="gold" size="sm" icon={<CheckCircle2 className="w-3 h-3 text-gold" />}>
+            Complete
+          </Badge>
         );
     }
   };
 
+  const cardVariant = stage.status === 'in_progress'
+    ? 'active'
+    : stage.status === 'complete'
+    ? 'gold-active'
+    : 'flat';
+
   return (
-    <button
-      type="button"
+    <Card
+      variant={cardVariant}
+      interactive
       onClick={() => onOpenDetail(stage.id)}
-      tabIndex={0}
-      aria-label={`${stage.name}: ${stage.status}`}
-      className={`min-w-[220px] flex-1 bg-slate border rounded-xl p-4 text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-crimson group ${
-        stage.status === 'in_progress'
-          ? 'border-crimson animate-pulse-glow shadow-[0_0_20px_rgba(196,48,43,0.3)] bg-slate-elevated'
-          : stage.status === 'complete'
-          ? 'border-gold/50 bg-slate hover:border-gold'
-          : 'border-slate-border opacity-60 hover:opacity-100'
-      } ${isActive ? 'ring-2 ring-crimson' : ''}`}
+      className={`min-w-[220px] flex-1 p-4 text-left transition-all duration-200 group ${
+        isActive ? 'ring-2 ring-crimson' : ''
+      } ${stage.status === 'queued' ? 'opacity-60 hover:opacity-100' : ''}`}
     >
       <div className="flex items-center justify-between mb-3">
         <span className="font-mono text-[10px] text-cyan font-bold uppercase tracking-wider">
           AGENT STAGE
         </span>
-        {getStatusBadge()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={stage.status}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            {getStatusBadge()}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <h3 className="font-display font-bold text-lg uppercase tracking-wide text-surface-text group-hover:text-white mb-1">
@@ -64,11 +77,16 @@ export const AgentStageCard: React.FC<AgentStageCardProps> = ({ stage, isActive,
       </p>
 
       {stage.status === 'complete' && (
-        <div className="flex items-center justify-between text-[11px] font-mono text-gold pt-2 border-t border-slate-border/50">
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center justify-between text-[11px] font-mono text-gold pt-2 border-t border-slate-border/50"
+        >
           <span>View Output</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-        </div>
+        </motion.div>
       )}
-    </button>
+    </Card>
   );
 };
